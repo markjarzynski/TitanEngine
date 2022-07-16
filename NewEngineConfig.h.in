@@ -1,0 +1,4 @@
+#define NewEngine_PROJECT_NAME  "@PROJECT_NAME@"
+#define NewEngine_VERSION       "@PROJECT_VERSION@"
+#define NewEngine_VERSION_MAJOR "@PROJECT_VERSION_MAJOR@"
+#define NewEngine_VERSION_MINOR "@PROJECT_VERSION_MINOR@"
