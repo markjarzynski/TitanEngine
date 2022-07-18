@@ -1,14 +1,19 @@
 #pragma once
 
+#define VK_USE_PLATFORM_WIN32_KHR
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
-#include <vulkan/vulkan.h>
+#define GLFW_EXPOSE_NATIVE_WIN32
+#include <GLFW/glfw3native.h>
+
+#include "NewEngineWindow.h"
 
 #include <stdexcept>
 #include <iostream>
 #include <string>
 #include <vector>
 #include <optional>
+#include <set>
 
 namespace NE
 {
@@ -16,11 +21,13 @@ namespace NE
 class NewEngineVulkan
 {
 public:
-    NewEngineVulkan();
+    NewEngineVulkan(NewEngineWindow* NEWindow);
     ~NewEngineVulkan();
 
     NewEngineVulkan(const NewEngineVulkan &) = delete;
     NewEngineVulkan &operator=(const NewEngineVulkan &) = delete;
+
+    NewEngineWindow* NEWindow;
 
     const std::vector<const char*> validationLayers = {
         "VK_LAYER_KHRONOS_validation"
@@ -35,10 +42,12 @@ public:
 private:
     VkInstance instance;
     VkDebugUtilsMessengerEXT debugMessenger;
+    VkSurfaceKHR surface;
     VkPhysicalDevice physicalDevice = VK_NULL_HANDLE;
 
     struct QueueFamilyIndices {
         std::optional<uint32_t> graphicsFamily;
+        std::optional<uint32_t> presentFamily;
 
         bool isComplete() {
             return graphicsFamily.has_value();
@@ -47,6 +56,7 @@ private:
 
     VkDevice device;
     VkQueue graphicsQueue;
+    VkQueue presentQueue;
 
     void initVulkan();
     void createInstance();
@@ -62,6 +72,8 @@ private:
     bool isDeviceSuitable(VkPhysicalDevice device);
     QueueFamilyIndices findQueueFamilies(VkPhysicalDevice device);
     void createLogicalDevice();
+    void createSurface();
+    
 };
 
 }

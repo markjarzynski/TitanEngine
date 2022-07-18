@@ -21,7 +21,7 @@ public:
 private:
 
     NewEngineWindow NEWindow {WIDTH, HEIGHT, "New Engine"};
-    NewEngineVulkan NEVulkan {};
+    NewEngineVulkan NEVulkan {&NEWindow};
 };
 
 }

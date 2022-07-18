@@ -21,7 +21,7 @@ void NewEngineWindow::initWindow ()
 
     glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
 
-    window = glfwCreateWindow(width, height, name.c_str(), nullptr, nullptr);
+    window =  glfwCreateWindow(width, height, name.c_str(), nullptr, nullptr);
 }
 
 }
