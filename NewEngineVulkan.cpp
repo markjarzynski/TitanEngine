@@ -24,39 +24,23 @@ NewEngineVulkan::NewEngineVulkan (NewEngineWindow* Window)
 NewEngineVulkan::~NewEngineVulkan ()
 {
     destroySyncObjects();
-
-    vkDestroyCommandPool(device, commandPool, nullptr);
-
-    for (auto framebuffer : swapChainFramebuffers)
-    {
-        vkDestroyFramebuffer(device, framebuffer, nullptr);
-    }
-
-    vkDestroyPipelineLayout(device, pipelineLayout, nullptr);
-    vkDestroyRenderPass(device, renderPass, nullptr);
-
-    for (auto imageView : swapChainImageViews)
-    {
-        vkDestroyImageView(device, imageView, nullptr);
-    }
-
-    vkDestroySwapchainKHR(device, swapChain, nullptr);
-    vkDestroyDevice(device, nullptr);
-
-    if (enableValidationLayers)
-    {
-        DestroyDebugUtilsMessengerEXT(instance, debugMessenger, nullptr);
-    }
-
-    vkDestroySurfaceKHR(instance, surface, nullptr);
-    vkDestroyInstance(instance, nullptr);
+    destroyCommandPool();
+    destroyFrameBuffers();
+    destroyGraphicsPipeline();
+    destroyRenderPass();
+    destroyImageViews();
+    destroySwapChain();
+    destroyDevice();
+    destroyDebugMessenger();
+    destroySurface();
+    destroyInstance();
 }
 
 void NewEngineVulkan::createInstance ()
 {
     if (enableValidationLayers && !checkValidationLayerSupport())
     {
-        throw std::runtime_error("validation layers requested, but not available!");
+        throw std::runtime_error("[ERROR]: Validation layers requested, but not available.");
     }
 
     VkApplicationInfo appInfo{};
@@ -92,8 +76,13 @@ void NewEngineVulkan::createInstance ()
 
     if (vkCreateInstance(&createInfo, nullptr, &instance) != VK_SUCCESS)
     {
-        throw std::runtime_error("failed to create instance!");
+        throw std::runtime_error("[ERROR]: Failed to create instance.");
     }
+}
+
+void NewEngineVulkan::destroyInstance ()
+{
+    vkDestroyInstance(instance, nullptr);
 }
 
 void NewEngineVulkan::enumerateExtensions ()
@@ -142,7 +131,7 @@ bool NewEngineVulkan::checkValidationLayerSupport ()
     return true;
 }
 
-std::vector<const char*> NewEngineVulkan::getRequiredExtensions()
+std::vector<const char*> NewEngineVulkan::getRequiredExtensions ()
 {
     uint32_t glfwExtensionCount = 0;
     const char** glfwExtensions;
@@ -173,8 +162,15 @@ void NewEngineVulkan::setupDebugMessenger ()
 
     if (CreateDebugUtilsMessengerEXT(instance, &createInfo, nullptr, &debugMessenger) != VK_SUCCESS)
     {
-        throw std::runtime_error("failed to set up debug messenger!");
+        throw std::runtime_error("[ERROR]: Failed to set up debug messenger.");
     }
+}
+
+void NewEngineVulkan::destroyDebugMessenger ()
+{
+    if (!enableValidationLayers) return;
+    
+    DestroyDebugUtilsMessengerEXT(instance, debugMessenger, nullptr);
 }
 
 VkResult NewEngineVulkan::CreateDebugUtilsMessengerEXT (VkInstance instance, const VkDebugUtilsMessengerCreateInfoEXT* pCreateInfo, const VkAllocationCallbacks* pAllocator, VkDebugUtilsMessengerEXT* pDebugMessenger)
@@ -215,7 +211,7 @@ void NewEngineVulkan::pickPhysicalDevice ()
 
     if (deviceCount == 0)
     {
-        throw std::runtime_error("failed to find GPUs with Vulkan support!");
+        throw std::runtime_error("[ERROR]: Failed to find GPUs with Vulkan support.");
     }
 
     std::vector<VkPhysicalDevice> devices(deviceCount);
@@ -232,7 +228,7 @@ void NewEngineVulkan::pickPhysicalDevice ()
 
     if (physicalDevice == VK_NULL_HANDLE)
     {
-        throw std::runtime_error("failed to find a suitable GPU!");
+        throw std::runtime_error("[ERROR]: Failed to find a suitable GPU.");
     }
 }
 
@@ -332,18 +328,28 @@ void NewEngineVulkan::createLogicalDevice ()
 
     if (vkCreateDevice(physicalDevice, &createInfo, nullptr, &device) != VK_SUCCESS)
     {
-        throw std::runtime_error("failed to create logical device!");
+        throw std::runtime_error("[ERROR]: Failed to create logical device.");
     }
     
     vkGetDeviceQueue(device, indices.presentFamily.value(), 0, &presentQueue);
     vkGetDeviceQueue(device, indices.graphicsFamily.value(), 0, &graphicsQueue);
 }
 
+void NewEngineVulkan::destroyDevice ()
+{
+    vkDestroyDevice(device, nullptr);
+}
+
 void NewEngineVulkan::createSurface ()
 {
     if (glfwCreateWindowSurface(instance, NEWindow->getWindow(), nullptr, &surface) != VK_SUCCESS) {
-        throw std::runtime_error("failed to create window surface!");
+        throw std::runtime_error("[ERROR]: Vulkan Failed to create window surface!");
     }
+}
+
+void NewEngineVulkan::destroySurface ()
+{
+    vkDestroySurfaceKHR(instance, surface, nullptr);
 }
 
 bool NewEngineVulkan::checkDeviceExtensionSupport (VkPhysicalDevice device)
@@ -491,7 +497,7 @@ void NewEngineVulkan::createSwapChain ()
 
     if (vkCreateSwapchainKHR(device, &createInfo, nullptr, &swapChain) != VK_SUCCESS)
     {
-        throw std::runtime_error("failed to create swap chain!");
+        throw std::runtime_error("[ERROR]: Failed to create swap chain.");
     }
 
     vkGetSwapchainImagesKHR(device, swapChain, &imageCount, nullptr);
@@ -500,6 +506,11 @@ void NewEngineVulkan::createSwapChain ()
 
     swapChainImageFormat = surfaceFormat.format;
     swapChainExtent = extent;
+}
+
+void NewEngineVulkan::destroySwapChain ()
+{
+    vkDestroySwapchainKHR(device, swapChain, nullptr);
 }
 
 void NewEngineVulkan::createImageViews ()
@@ -528,8 +539,16 @@ void NewEngineVulkan::createImageViews ()
 
         if (vkCreateImageView(device, &createInfo, nullptr, &swapChainImageViews[i]) != VK_SUCCESS)
         {
-            throw std::runtime_error("failed to create image views!");
+            throw std::runtime_error("[ERROR]: Vulkan failed to create image views.");
         }
+    }
+}
+
+void NewEngineVulkan::destroyImageViews ()
+{
+    for (auto imageView : swapChainImageViews)
+    {
+        vkDestroyImageView(device, imageView, nullptr);
     }
 }
 
@@ -624,7 +643,7 @@ void NewEngineVulkan::createGraphicsPipeline ()
 
     if (vkCreatePipelineLayout(device, &pipelineLayoutInfo, nullptr, &pipelineLayout) != VK_SUCCESS)
     {
-        throw std::runtime_error("Failed to create pipeline layout.");
+        throw std::runtime_error("[ERROR]: Failed to create pipeline layout.");
     }
 
     VkGraphicsPipelineCreateInfo pipelineInfo{};
@@ -644,11 +663,17 @@ void NewEngineVulkan::createGraphicsPipeline ()
 
     if (vkCreateGraphicsPipelines(device, VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &graphicsPipeline) != VK_SUCCESS)
     {
-        throw std::runtime_error("Failed to create graphics pipeline.");
+        throw std::runtime_error("[ERROR]: Failed to create graphics pipeline.");
     }
 
     vkDestroyShaderModule(device, fragShaderModule, nullptr);
     vkDestroyShaderModule(device, vertShaderModule, nullptr);
+}
+
+void NewEngineVulkan::destroyGraphicsPipeline ()
+{
+    vkDestroyPipeline(device, graphicsPipeline, nullptr);
+    vkDestroyPipelineLayout(device, pipelineLayout, nullptr);
 }
 
 VkShaderModule NewEngineVulkan::createShaderModule (const std::vector<char>& code)
@@ -661,7 +686,7 @@ VkShaderModule NewEngineVulkan::createShaderModule (const std::vector<char>& cod
     VkShaderModule shaderModule;
     if (vkCreateShaderModule(device, &createInfo, nullptr, &shaderModule) != VK_SUCCESS)
     {
-        throw std::runtime_error("Failed to create shader module.");
+        throw std::runtime_error("[ERROR]: Failed to create shader module.");
     }
 
     return shaderModule;
@@ -707,8 +732,14 @@ void NewEngineVulkan::createRenderPass ()
 
     if (vkCreateRenderPass(device, &renderPassInfo, nullptr, &renderPass) != VK_SUCCESS)
     {
-        throw std::runtime_error("Failed to create render pass.");
+        throw std::runtime_error("[ERROR]: Failed to create render pass.");
     }
+}
+
+void NewEngineVulkan::destroyRenderPass ()
+{
+    //vkDestroyPipelineLayout(device, pipelineLayout, nullptr);
+    vkDestroyRenderPass(device, renderPass, nullptr);
 }
 
 void NewEngineVulkan::createFrameBuffers ()
@@ -732,11 +763,19 @@ void NewEngineVulkan::createFrameBuffers ()
 
         if (vkCreateFramebuffer(device, &framebufferInfo, nullptr, &swapChainFramebuffers[i]) != VK_SUCCESS)
         {
-            throw std::runtime_error("Failed to create framebuffer.");
+            throw std::runtime_error("[ERROR]: Failed to create framebuffer.");
         }
-
     }
 }
+
+void NewEngineVulkan::destroyFrameBuffers ()
+{
+    for (auto framebuffer : swapChainFramebuffers)
+    {
+        vkDestroyFramebuffer(device, framebuffer, nullptr);
+    }
+}
+
 
 void NewEngineVulkan::createCommandPool ()
 {
@@ -749,8 +788,14 @@ void NewEngineVulkan::createCommandPool ()
 
     if (vkCreateCommandPool(device, &poolInfo, nullptr, &commandPool) != VK_SUCCESS)
     {
-        throw std::runtime_error("Failed to create command pool.");
+        throw std::runtime_error("[ERROR]: Failed to create command pool.");
     }
+}
+
+void NewEngineVulkan::destroyCommandPool ()
+{
+
+    vkDestroyCommandPool(device, commandPool, nullptr);
 }
 
 void NewEngineVulkan::createCommandBuffer ()
@@ -763,7 +808,7 @@ void NewEngineVulkan::createCommandBuffer ()
 
     if (vkAllocateCommandBuffers(device, &allocInfo, &commandBuffer) != VK_SUCCESS)
     {
-        throw std::runtime_error("Failed to allocate command buffers.");
+        throw std::runtime_error("[ERROR]: Failed to allocate command buffers.");
     }
 }
 
@@ -771,12 +816,12 @@ void NewEngineVulkan::recordCommandBuffer (VkCommandBuffer commandBuffer, uint32
 {
     VkCommandBufferBeginInfo beginInfo{};
     beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
-    beginInfo.flags = 0; // Optional
-    beginInfo.pInheritanceInfo = nullptr; // Optional
+    beginInfo.flags = 0;
+    beginInfo.pInheritanceInfo = nullptr;
 
     if (vkBeginCommandBuffer(commandBuffer, &beginInfo) != VK_SUCCESS)
     {
-        throw std::runtime_error("Failed to begin recording command buffer.");
+        throw std::runtime_error("[ERROR]: Failed to begin recording command buffer.");
     }
 
     VkRenderPassBeginInfo renderPassInfo{};
@@ -813,7 +858,7 @@ void NewEngineVulkan::recordCommandBuffer (VkCommandBuffer commandBuffer, uint32
 
     if (vkEndCommandBuffer(commandBuffer) != VK_SUCCESS)
     {
-        throw std::runtime_error("Failed to record command buffer.");
+        throw std::runtime_error("[ERROR]: Failed to record command buffer.");
     }
 }
 
@@ -830,7 +875,7 @@ void NewEngineVulkan::createSyncObjects ()
         vkCreateSemaphore(device, &semaphoreInfo, nullptr, &renderFinishedSemaphore) != VK_SUCCESS ||
         vkCreateFence(device, &fenceInfo, nullptr, &inFlightFence) != VK_SUCCESS)
     {
-        throw std::runtime_error("failed to create semaphores!");
+        throw std::runtime_error("[ERROR]: Failed to create semaphores.");
     }
 }
 
@@ -869,7 +914,7 @@ void NewEngineVulkan::drawFrame ()
 
     if (vkQueueSubmit(graphicsQueue, 1, &submitInfo, inFlightFence) != VK_SUCCESS)
     {
-        throw std::runtime_error("Failed to submit draw command buffer.");
+        throw std::runtime_error("[ERROR]: Failed to submit draw command buffer.");
     }
 
     VkPresentInfoKHR presentInfo{};
@@ -891,5 +936,4 @@ void NewEngineVulkan::idle ()
     vkDeviceWaitIdle(device);
 }
 
-
-}
+} // namespace NE

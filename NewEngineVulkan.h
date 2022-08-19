@@ -82,6 +82,7 @@ private:
     VkFormat swapChainImageFormat;
     VkExtent2D swapChainExtent;
     std::vector<VkImageView> swapChainImageViews;
+
     VkRenderPass renderPass;
     VkPipelineLayout pipelineLayout;
     VkPipeline graphicsPipeline;
@@ -95,31 +96,53 @@ private:
     VkFence inFlightFence;
 
     void createInstance();
+    void destroyInstance();
+
     void enumerateExtensions();
     bool checkValidationLayerSupport();
     std::vector<const char*> getRequiredExtensions();
+    
     static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity, VkDebugUtilsMessageTypeFlagsEXT messageType, const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData, void* pUserData);
     void setupDebugMessenger();
     VkResult CreateDebugUtilsMessengerEXT(VkInstance instance, const VkDebugUtilsMessengerCreateInfoEXT* pCreateInfo, const VkAllocationCallbacks* pAllocator, VkDebugUtilsMessengerEXT* pDebugMessenger);
     void DestroyDebugUtilsMessengerEXT(VkInstance instance, VkDebugUtilsMessengerEXT debugMessenger, const VkAllocationCallbacks* pAllocator);
     void populateDebugMessengerCreateInfo(VkDebugUtilsMessengerCreateInfoEXT& createInfo);
+    void destroyDebugMessenger();
+
     void pickPhysicalDevice();
     bool isDeviceSuitable(VkPhysicalDevice device);
     QueueFamilyIndices findQueueFamilies(VkPhysicalDevice device);
     void createLogicalDevice();
+    void destroyDevice();
+
     void createSurface();
+    void destroySurface();
     bool checkDeviceExtensionSupport(VkPhysicalDevice device);
+
     SwapChainSupportDetails querySwapChainSupport(VkPhysicalDevice device);
     VkSurfaceFormatKHR chooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR>& availableFormats);
     VkPresentModeKHR chooseSwapPresentMode(const std::vector<VkPresentModeKHR>& availablePresentModes);
     VkExtent2D chooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilities);
     void createSwapChain();
+    void destroySwapChain();
+
     void createImageViews();
+    void destroyImageViews();
+
     void createGraphicsPipeline();
+    void destroyGraphicsPipeline();
+
     VkShaderModule createShaderModule(const std::vector<char>& code);
+
     void createRenderPass();
+    void destroyRenderPass();
+
     void createFrameBuffers();
+    void destroyFrameBuffers();
+
     void createCommandPool();
+    void destroyCommandPool();
+
     void createCommandBuffer();
     void recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex);
     
