@@ -513,6 +513,7 @@ void NewEngineVulkan::recreateSwapChain ()
     int width = 0, height = 0;
     glfwGetFramebufferSize(NEWindow->getWindow(), &width, &height);
 
+    // while the window is minimized.
     while (width == 0 || height == 0)
     {
         glfwGetFramebufferSize(NEWindow->getWindow(), &width, &height);
