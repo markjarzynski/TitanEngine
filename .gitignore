@@ -1,1 +1,5 @@
+# ignore build directory
 build
+
+# ignore compiled shaders
+*.spv

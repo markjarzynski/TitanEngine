@@ -24,4 +24,4 @@ private:
     NewEngineVulkan NEVulkan {&NEWindow};
 };
 
-}
+} // namespace NE

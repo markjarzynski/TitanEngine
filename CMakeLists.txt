@@ -29,7 +29,7 @@ add_subdirectory("Common/ThirdParty/glfw")
 
 
 include_directories(${PROJECT_NAME} ${CMAKE_CURRENT_BINARY_DIR})
-add_executable(${PROJECT_NAME} NewEngine.cpp NewEngineApp.h NewEngineApp.cpp NewEngineWindow.h NewEngineWindow.cpp NewEngineVulkan.h NewEngineVulkan.cpp)
+add_executable(${PROJECT_NAME} NewEngine.cpp NewEngineApp.h NewEngineApp.cpp NewEngineWindow.h NewEngineWindow.cpp NewEngineVulkan.h NewEngineVulkan.cpp Util.h Util.cpp)
 
 target_include_directories(${PROJECT_NAME} PUBLIC "${Vulkan_INCLUDE_DIRS}")
 target_link_libraries(${PROJECT_NAME} glfw vulkan-1)

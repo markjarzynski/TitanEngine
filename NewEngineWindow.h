@@ -25,7 +25,6 @@ public:
     GLFWwindow* getWindow() { return window; }
 
 private:
-    void initWindow();
 
     int width;
     int height;
@@ -34,4 +33,4 @@ private:
     GLFWwindow* window;
 };
 
-}
+} // namespace NE

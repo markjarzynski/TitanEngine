@@ -7,6 +7,7 @@
 #include <GLFW/glfw3native.h>
 
 #include "NewEngineWindow.h"
+#include "Util.h"
 
 #include <stdexcept>
 #include <iostream>
@@ -29,6 +30,9 @@ public:
 
     NewEngineVulkan(const NewEngineVulkan &) = delete;
     NewEngineVulkan &operator=(const NewEngineVulkan &) = delete;
+
+    void drawFrame();
+    void idle();
 
     NewEngineWindow* NEWindow;
 
@@ -78,8 +82,18 @@ private:
     VkFormat swapChainImageFormat;
     VkExtent2D swapChainExtent;
     std::vector<VkImageView> swapChainImageViews;
+    VkRenderPass renderPass;
+    VkPipelineLayout pipelineLayout;
+    VkPipeline graphicsPipeline;
 
-    void initVulkan();
+    std::vector<VkFramebuffer> swapChainFramebuffers;
+    VkCommandPool commandPool;
+    VkCommandBuffer commandBuffer;
+
+    VkSemaphore imageAvailableSemaphore;
+    VkSemaphore renderFinishedSemaphore;
+    VkFence inFlightFence;
+
     void createInstance();
     void enumerateExtensions();
     bool checkValidationLayerSupport();
@@ -102,6 +116,15 @@ private:
     void createSwapChain();
     void createImageViews();
     void createGraphicsPipeline();
+    VkShaderModule createShaderModule(const std::vector<char>& code);
+    void createRenderPass();
+    void createFrameBuffers();
+    void createCommandPool();
+    void createCommandBuffer();
+    void recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex);
+    
+    void createSyncObjects();
+    void destroySyncObjects();
 };
 
-}
+} // namespace NE
