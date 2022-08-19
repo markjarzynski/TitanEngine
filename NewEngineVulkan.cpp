@@ -508,6 +508,28 @@ void NewEngineVulkan::createSwapChain ()
     swapChainExtent = extent;
 }
 
+void NewEngineVulkan::recreateSwapChain ()
+{
+    int width = 0, height = 0;
+    glfwGetFramebufferSize(NEWindow->getWindow(), &width, &height);
+
+    while (width == 0 || height == 0)
+    {
+        glfwGetFramebufferSize(NEWindow->getWindow(), &width, &height);
+        glfwWaitEvents();
+    }
+
+    vkDeviceWaitIdle(device);
+
+    destroyFrameBuffers();
+    destroyImageViews();
+    destroySwapChain();
+
+    createSwapChain();
+    createImageViews();
+    createFrameBuffers();
+}
+
 void NewEngineVulkan::destroySwapChain ()
 {
     vkDestroySwapchainKHR(device, swapChain, nullptr);
@@ -901,10 +923,21 @@ void NewEngineVulkan::destroySyncObjects ()
 void NewEngineVulkan::drawFrame ()
 {
     vkWaitForFences(device, 1, &inFlightFences[currentFrame], VK_TRUE, UINT64_MAX);
-    vkResetFences(device, 1, &inFlightFences[currentFrame]);
 
     uint32_t imageIndex;
-    vkAcquireNextImageKHR(device, swapChain, UINT64_MAX, imageAvailableSemaphores[currentFrame], VK_NULL_HANDLE, &imageIndex);
+    VkResult result = vkAcquireNextImageKHR(device, swapChain, UINT64_MAX, imageAvailableSemaphores[currentFrame], VK_NULL_HANDLE, &imageIndex);
+
+    if (result == VK_ERROR_OUT_OF_DATE_KHR)
+    {
+        recreateSwapChain();
+        return;
+    }
+    else if (result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR)
+    {
+        throw std::runtime_error("[ERROR]: Failed to acquire swap chain image!");
+    }
+
+    vkResetFences(device, 1, &inFlightFences[currentFrame]);
 
     vkResetCommandBuffer(commandBuffers[currentFrame], 0);
     recordCommandBuffer(commandBuffers[currentFrame], imageIndex);
@@ -920,7 +953,6 @@ void NewEngineVulkan::drawFrame ()
 
     VkPipelineStageFlags waitStages[] = {VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT};
     submitInfo.pWaitDstStageMask = waitStages;
-
 
     VkSemaphore signalSemaphores[] = {renderFinishedSemaphores[currentFrame]};
     submitInfo.signalSemaphoreCount = 1;
@@ -942,7 +974,17 @@ void NewEngineVulkan::drawFrame ()
     presentInfo.pSwapchains = swapChains;
     presentInfo.pImageIndices = &imageIndex;
 
-    vkQueuePresentKHR(presentQueue, &presentInfo);
+    result = vkQueuePresentKHR(presentQueue, &presentInfo);
+
+    if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR || NEWindow->framebufferResized)
+    {
+        NEWindow->framebufferResized = false;
+        recreateSwapChain();
+    }
+    else if (result != VK_SUCCESS)
+    {
+        throw std::runtime_error("[ERROR]: Failed to present swap chain image.");
+    }
 
     currentFrame = (currentFrame + 1) % MAX_FRAMES_IN_FLIGHT;
 }

@@ -24,6 +24,8 @@ public:
 
     GLFWwindow* getWindow() { return window; }
 
+    bool framebufferResized = false;
+
 private:
 
     int width;
@@ -31,6 +33,9 @@ private:
 
     std::string name;
     GLFWwindow* window;
+
 };
+
+static void framebufferResizeCallback(GLFWwindow* window, int width, int height);
 
 } // namespace NE
