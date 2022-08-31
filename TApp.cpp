@@ -1,17 +1,17 @@
-#include "NewEngineApp.h"
+#include "TApp.h"
 
-namespace NE
+namespace Titan
 {
 
-void NewEngineApp::run ()
+void TApp::run ()
 {
-    while (!NEWindow.ShouldClose())
+    while (!Window.ShouldClose())
     {
         glfwPollEvents();
-        NEVulkan.drawFrame();
+        Vulkan.drawFrame();
     }
 
-    NEVulkan.idle();
+    Vulkan.idle();
 }
 
 }

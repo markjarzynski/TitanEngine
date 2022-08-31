@@ -6,7 +6,7 @@
 #define GLFW_EXPOSE_NATIVE_WIN32
 #include <GLFW/glfw3native.h>
 
-#include "NewEngineWindow.h"
+#include "TWindow.h"
 #include "Util.h"
 
 #include <stdexcept>
@@ -19,22 +19,22 @@
 #include <limits>
 #include <algorithm>
 
-namespace NE
+namespace Titan
 {
 
-class NewEngineVulkan
+class TVulkan
 {
 public:
-    NewEngineVulkan(NewEngineWindow* NEWindow);
-    ~NewEngineVulkan();
+    TVulkan(TWindow* Window);
+    ~TVulkan();
 
-    NewEngineVulkan(const NewEngineVulkan &) = delete;
-    NewEngineVulkan &operator=(const NewEngineVulkan &) = delete;
+    TVulkan(const TVulkan &) = delete;
+    TVulkan &operator=(const TVulkan &) = delete;
 
     void drawFrame();
     void idle();
 
-    NewEngineWindow* NEWindow;
+    TWindow* Window;
 
     const std::vector<const char*> validationLayers = {
         "VK_LAYER_KHRONOS_validation"
@@ -154,4 +154,4 @@ private:
     void destroySyncObjects();
 };
 
-} // namespace NE
+} // namespace Titan

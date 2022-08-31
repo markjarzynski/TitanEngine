@@ -1,10 +1,10 @@
-#include "NewEngineVulkan.h"
+#include "TVulkan.h"
 
-namespace NE
+namespace Titan
 {
 
-NewEngineVulkan::NewEngineVulkan (NewEngineWindow* Window)
-    : NEWindow(Window)
+TVulkan::TVulkan (TWindow* window)
+    : Window(window)
 {
     createInstance();
     setupDebugMessenger();
@@ -21,7 +21,7 @@ NewEngineVulkan::NewEngineVulkan (NewEngineWindow* Window)
     createSyncObjects();
 }
 
-NewEngineVulkan::~NewEngineVulkan ()
+TVulkan::~TVulkan ()
 {
     destroySyncObjects();
     destroyCommandPool();
@@ -36,7 +36,7 @@ NewEngineVulkan::~NewEngineVulkan ()
     destroyInstance();
 }
 
-void NewEngineVulkan::createInstance ()
+void TVulkan::createInstance ()
 {
     if (enableValidationLayers && !checkValidationLayerSupport())
     {
@@ -45,9 +45,9 @@ void NewEngineVulkan::createInstance ()
 
     VkApplicationInfo appInfo{};
     appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
-    appInfo.pApplicationName = "NewEngine";
+    appInfo.pApplicationName = "TitanEngine";
     appInfo.applicationVersion = VK_MAKE_VERSION(1, 0, 0);
-    appInfo.pEngineName = "NewEngine";
+    appInfo.pEngineName = "TitanEngine";
     appInfo.engineVersion = VK_MAKE_VERSION(1, 0, 0);
     appInfo.apiVersion = VK_API_VERSION_1_0;
 
@@ -80,12 +80,12 @@ void NewEngineVulkan::createInstance ()
     }
 }
 
-void NewEngineVulkan::destroyInstance ()
+void TVulkan::destroyInstance ()
 {
     vkDestroyInstance(instance, nullptr);
 }
 
-void NewEngineVulkan::enumerateExtensions ()
+void TVulkan::enumerateExtensions ()
 {
     uint32_t extensionCount = 0;
     vkEnumerateInstanceExtensionProperties(nullptr, &extensionCount, nullptr);
@@ -101,7 +101,7 @@ void NewEngineVulkan::enumerateExtensions ()
     }
 }
 
-bool NewEngineVulkan::checkValidationLayerSupport ()
+bool TVulkan::checkValidationLayerSupport ()
 {
     uint32_t layerCount;
     vkEnumerateInstanceLayerProperties(&layerCount, nullptr);
@@ -131,7 +131,7 @@ bool NewEngineVulkan::checkValidationLayerSupport ()
     return true;
 }
 
-std::vector<const char*> NewEngineVulkan::getRequiredExtensions ()
+std::vector<const char*> TVulkan::getRequiredExtensions ()
 {
     uint32_t glfwExtensionCount = 0;
     const char** glfwExtensions;
@@ -147,13 +147,13 @@ std::vector<const char*> NewEngineVulkan::getRequiredExtensions ()
     return extensions;
 }
 
-VKAPI_ATTR VkBool32 VKAPI_CALL NewEngineVulkan::debugCallback (VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity, VkDebugUtilsMessageTypeFlagsEXT messageType, const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData, void* pUserData)
+VKAPI_ATTR VkBool32 VKAPI_CALL TVulkan::debugCallback (VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity, VkDebugUtilsMessageTypeFlagsEXT messageType, const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData, void* pUserData)
 {
     std::cerr << "validation layer: " << pCallbackData->pMessage << std::endl;
     return VK_FALSE;
 }
 
-void NewEngineVulkan::setupDebugMessenger ()
+void TVulkan::setupDebugMessenger ()
 {
     if (!enableValidationLayers) return;
 
@@ -166,14 +166,14 @@ void NewEngineVulkan::setupDebugMessenger ()
     }
 }
 
-void NewEngineVulkan::destroyDebugMessenger ()
+void TVulkan::destroyDebugMessenger ()
 {
     if (!enableValidationLayers) return;
     
     DestroyDebugUtilsMessengerEXT(instance, debugMessenger, nullptr);
 }
 
-VkResult NewEngineVulkan::CreateDebugUtilsMessengerEXT (VkInstance instance, const VkDebugUtilsMessengerCreateInfoEXT* pCreateInfo, const VkAllocationCallbacks* pAllocator, VkDebugUtilsMessengerEXT* pDebugMessenger)
+VkResult TVulkan::CreateDebugUtilsMessengerEXT (VkInstance instance, const VkDebugUtilsMessengerCreateInfoEXT* pCreateInfo, const VkAllocationCallbacks* pAllocator, VkDebugUtilsMessengerEXT* pDebugMessenger)
 {
     auto func = (PFN_vkCreateDebugUtilsMessengerEXT) vkGetInstanceProcAddr(instance, "vkCreateDebugUtilsMessengerEXT");
     if (func != nullptr)
@@ -186,7 +186,7 @@ VkResult NewEngineVulkan::CreateDebugUtilsMessengerEXT (VkInstance instance, con
     }
 }
 
-void NewEngineVulkan::DestroyDebugUtilsMessengerEXT (VkInstance instance, VkDebugUtilsMessengerEXT debugMessenger, const VkAllocationCallbacks* pAllocator)
+void TVulkan::DestroyDebugUtilsMessengerEXT (VkInstance instance, VkDebugUtilsMessengerEXT debugMessenger, const VkAllocationCallbacks* pAllocator)
 {
     auto func = (PFN_vkDestroyDebugUtilsMessengerEXT) vkGetInstanceProcAddr(instance, "vkDestroyDebugUtilsMessengerEXT");
     if (func != nullptr)
@@ -195,7 +195,7 @@ void NewEngineVulkan::DestroyDebugUtilsMessengerEXT (VkInstance instance, VkDebu
     }
 }
 
-void NewEngineVulkan::populateDebugMessengerCreateInfo (VkDebugUtilsMessengerCreateInfoEXT& createInfo)
+void TVulkan::populateDebugMessengerCreateInfo (VkDebugUtilsMessengerCreateInfoEXT& createInfo)
 {
     createInfo = {};
     createInfo.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
@@ -204,7 +204,7 @@ void NewEngineVulkan::populateDebugMessengerCreateInfo (VkDebugUtilsMessengerCre
     createInfo.pfnUserCallback = debugCallback;
 }
 
-void NewEngineVulkan::pickPhysicalDevice ()
+void TVulkan::pickPhysicalDevice ()
 {
     uint32_t deviceCount = 0;
     vkEnumeratePhysicalDevices(instance, &deviceCount, nullptr);
@@ -232,7 +232,7 @@ void NewEngineVulkan::pickPhysicalDevice ()
     }
 }
 
-bool NewEngineVulkan::isDeviceSuitable (VkPhysicalDevice device)
+bool TVulkan::isDeviceSuitable (VkPhysicalDevice device)
 {
     QueueFamilyIndices indices = findQueueFamilies(device);
 
@@ -248,7 +248,7 @@ bool NewEngineVulkan::isDeviceSuitable (VkPhysicalDevice device)
     return indices.isComplete() && extensionsSupported && swapChainAdequate;
 }
 
-NewEngineVulkan::QueueFamilyIndices NewEngineVulkan::findQueueFamilies (VkPhysicalDevice device)
+TVulkan::QueueFamilyIndices TVulkan::findQueueFamilies (VkPhysicalDevice device)
 {
     QueueFamilyIndices indices;
 
@@ -285,7 +285,7 @@ NewEngineVulkan::QueueFamilyIndices NewEngineVulkan::findQueueFamilies (VkPhysic
     return indices;
 }
 
-void NewEngineVulkan::createLogicalDevice ()
+void TVulkan::createLogicalDevice ()
 {
     QueueFamilyIndices indices = findQueueFamilies(physicalDevice);
 
@@ -335,24 +335,24 @@ void NewEngineVulkan::createLogicalDevice ()
     vkGetDeviceQueue(device, indices.graphicsFamily.value(), 0, &graphicsQueue);
 }
 
-void NewEngineVulkan::destroyDevice ()
+void TVulkan::destroyDevice ()
 {
     vkDestroyDevice(device, nullptr);
 }
 
-void NewEngineVulkan::createSurface ()
+void TVulkan::createSurface ()
 {
-    if (glfwCreateWindowSurface(instance, NEWindow->getWindow(), nullptr, &surface) != VK_SUCCESS) {
+    if (glfwCreateWindowSurface(instance, Window->getWindow(), nullptr, &surface) != VK_SUCCESS) {
         throw std::runtime_error("[ERROR]: Vulkan Failed to create window surface!");
     }
 }
 
-void NewEngineVulkan::destroySurface ()
+void TVulkan::destroySurface ()
 {
     vkDestroySurfaceKHR(instance, surface, nullptr);
 }
 
-bool NewEngineVulkan::checkDeviceExtensionSupport (VkPhysicalDevice device)
+bool TVulkan::checkDeviceExtensionSupport (VkPhysicalDevice device)
 {
     uint32_t extensionCount;
     vkEnumerateDeviceExtensionProperties(device, nullptr, &extensionCount, nullptr);
@@ -369,7 +369,7 @@ bool NewEngineVulkan::checkDeviceExtensionSupport (VkPhysicalDevice device)
     return requiredExtensions.empty();
 }
 
-NewEngineVulkan::SwapChainSupportDetails NewEngineVulkan::querySwapChainSupport (VkPhysicalDevice device)
+TVulkan::SwapChainSupportDetails TVulkan::querySwapChainSupport (VkPhysicalDevice device)
 {
     SwapChainSupportDetails details;
 
@@ -396,7 +396,7 @@ NewEngineVulkan::SwapChainSupportDetails NewEngineVulkan::querySwapChainSupport 
     return details;
 }
 
-VkSurfaceFormatKHR NewEngineVulkan::chooseSwapSurfaceFormat (const std::vector<VkSurfaceFormatKHR>& availableFormats)
+VkSurfaceFormatKHR TVulkan::chooseSwapSurfaceFormat (const std::vector<VkSurfaceFormatKHR>& availableFormats)
 {
     for (const auto& availableFormat : availableFormats)
     {
@@ -409,7 +409,7 @@ VkSurfaceFormatKHR NewEngineVulkan::chooseSwapSurfaceFormat (const std::vector<V
     return availableFormats[0];
 }
 
-VkPresentModeKHR NewEngineVulkan::chooseSwapPresentMode (const std::vector<VkPresentModeKHR>& availablePresentModes)
+VkPresentModeKHR TVulkan::chooseSwapPresentMode (const std::vector<VkPresentModeKHR>& availablePresentModes)
 {
     for (const auto& availablePresentMode : availablePresentModes)
     {
@@ -422,7 +422,7 @@ VkPresentModeKHR NewEngineVulkan::chooseSwapPresentMode (const std::vector<VkPre
     return VK_PRESENT_MODE_FIFO_KHR;
 }
 
-VkExtent2D NewEngineVulkan::chooseSwapExtent (const VkSurfaceCapabilitiesKHR& capabilities)
+VkExtent2D TVulkan::chooseSwapExtent (const VkSurfaceCapabilitiesKHR& capabilities)
 {
     /*if (capabilities.currentExtent.width != UINT32_MAX)
     {
@@ -432,7 +432,7 @@ VkExtent2D NewEngineVulkan::chooseSwapExtent (const VkSurfaceCapabilitiesKHR& ca
     */
     {
         int width, height;
-        glfwGetFramebufferSize(NEWindow->getWindow(), &width, &height);
+        glfwGetFramebufferSize(Window->getWindow(), &width, &height);
 
         VkExtent2D actualExtent = {
             static_cast<uint32_t>(width),
@@ -446,7 +446,7 @@ VkExtent2D NewEngineVulkan::chooseSwapExtent (const VkSurfaceCapabilitiesKHR& ca
     }
 }
 
-void NewEngineVulkan::createSwapChain ()
+void TVulkan::createSwapChain ()
 {
     SwapChainSupportDetails swapChainSupport = querySwapChainSupport(physicalDevice);
 
@@ -508,15 +508,15 @@ void NewEngineVulkan::createSwapChain ()
     swapChainExtent = extent;
 }
 
-void NewEngineVulkan::recreateSwapChain ()
+void TVulkan::recreateSwapChain ()
 {
     int width = 0, height = 0;
-    glfwGetFramebufferSize(NEWindow->getWindow(), &width, &height);
+    glfwGetFramebufferSize(Window->getWindow(), &width, &height);
 
     // while the window is minimized.
     while (width == 0 || height == 0)
     {
-        glfwGetFramebufferSize(NEWindow->getWindow(), &width, &height);
+        glfwGetFramebufferSize(Window->getWindow(), &width, &height);
         glfwWaitEvents();
     }
 
@@ -531,12 +531,12 @@ void NewEngineVulkan::recreateSwapChain ()
     createFrameBuffers();
 }
 
-void NewEngineVulkan::destroySwapChain ()
+void TVulkan::destroySwapChain ()
 {
     vkDestroySwapchainKHR(device, swapChain, nullptr);
 }
 
-void NewEngineVulkan::createImageViews ()
+void TVulkan::createImageViews ()
 {
     swapChainImageViews.resize(swapChainImages.size());
 
@@ -567,7 +567,7 @@ void NewEngineVulkan::createImageViews ()
     }
 }
 
-void NewEngineVulkan::destroyImageViews ()
+void TVulkan::destroyImageViews ()
 {
     for (auto imageView : swapChainImageViews)
     {
@@ -575,7 +575,7 @@ void NewEngineVulkan::destroyImageViews ()
     }
 }
 
-void NewEngineVulkan::createGraphicsPipeline ()
+void TVulkan::createGraphicsPipeline ()
 {
     auto vertShaderCode = readFile("shaders/vert.spv");
     auto fragShaderCode = readFile("shaders/frag.spv");
@@ -693,13 +693,13 @@ void NewEngineVulkan::createGraphicsPipeline ()
     vkDestroyShaderModule(device, vertShaderModule, nullptr);
 }
 
-void NewEngineVulkan::destroyGraphicsPipeline ()
+void TVulkan::destroyGraphicsPipeline ()
 {
     vkDestroyPipeline(device, graphicsPipeline, nullptr);
     vkDestroyPipelineLayout(device, pipelineLayout, nullptr);
 }
 
-VkShaderModule NewEngineVulkan::createShaderModule (const std::vector<char>& code)
+VkShaderModule TVulkan::createShaderModule (const std::vector<char>& code)
 {
     VkShaderModuleCreateInfo createInfo{};
     createInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
@@ -715,7 +715,7 @@ VkShaderModule NewEngineVulkan::createShaderModule (const std::vector<char>& cod
     return shaderModule;
 }
 
-void NewEngineVulkan::createRenderPass ()
+void TVulkan::createRenderPass ()
 {
     VkAttachmentDescription colorAttachment{};
     colorAttachment.format = swapChainImageFormat;
@@ -759,13 +759,13 @@ void NewEngineVulkan::createRenderPass ()
     }
 }
 
-void NewEngineVulkan::destroyRenderPass ()
+void TVulkan::destroyRenderPass ()
 {
     //vkDestroyPipelineLayout(device, pipelineLayout, nullptr);
     vkDestroyRenderPass(device, renderPass, nullptr);
 }
 
-void NewEngineVulkan::createFrameBuffers ()
+void TVulkan::createFrameBuffers ()
 {
     swapChainFramebuffers.resize(swapChainImageViews.size());
 
@@ -791,7 +791,7 @@ void NewEngineVulkan::createFrameBuffers ()
     }
 }
 
-void NewEngineVulkan::destroyFrameBuffers ()
+void TVulkan::destroyFrameBuffers ()
 {
     for (auto framebuffer : swapChainFramebuffers)
     {
@@ -800,7 +800,7 @@ void NewEngineVulkan::destroyFrameBuffers ()
 }
 
 
-void NewEngineVulkan::createCommandPool ()
+void TVulkan::createCommandPool ()
 {
     QueueFamilyIndices queueFamilyIndices = findQueueFamilies(physicalDevice);
 
@@ -815,13 +815,13 @@ void NewEngineVulkan::createCommandPool ()
     }
 }
 
-void NewEngineVulkan::destroyCommandPool ()
+void TVulkan::destroyCommandPool ()
 {
 
     vkDestroyCommandPool(device, commandPool, nullptr);
 }
 
-void NewEngineVulkan::createCommandBuffers ()
+void TVulkan::createCommandBuffers ()
 {
     commandBuffers.resize(MAX_FRAMES_IN_FLIGHT);
 
@@ -837,7 +837,7 @@ void NewEngineVulkan::createCommandBuffers ()
     }
 }
 
-void NewEngineVulkan::recordCommandBuffer (VkCommandBuffer commandBuffer, uint32_t imageIndex)
+void TVulkan::recordCommandBuffer (VkCommandBuffer commandBuffer, uint32_t imageIndex)
 {
     VkCommandBufferBeginInfo beginInfo{};
     beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
@@ -887,7 +887,7 @@ void NewEngineVulkan::recordCommandBuffer (VkCommandBuffer commandBuffer, uint32
     }
 }
 
-void NewEngineVulkan::createSyncObjects ()
+void TVulkan::createSyncObjects ()
 {
     imageAvailableSemaphores.resize(MAX_FRAMES_IN_FLIGHT);
     renderFinishedSemaphores.resize(MAX_FRAMES_IN_FLIGHT);
@@ -911,7 +911,7 @@ void NewEngineVulkan::createSyncObjects ()
     }
 }
 
-void NewEngineVulkan::destroySyncObjects ()
+void TVulkan::destroySyncObjects ()
 {
     for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
     {
@@ -921,7 +921,7 @@ void NewEngineVulkan::destroySyncObjects ()
     }
 }
 
-void NewEngineVulkan::drawFrame ()
+void TVulkan::drawFrame ()
 {
     vkWaitForFences(device, 1, &inFlightFences[currentFrame], VK_TRUE, UINT64_MAX);
 
@@ -977,9 +977,9 @@ void NewEngineVulkan::drawFrame ()
 
     result = vkQueuePresentKHR(presentQueue, &presentInfo);
 
-    if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR || NEWindow->framebufferResized)
+    if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR || Window->framebufferResized)
     {
-        NEWindow->framebufferResized = false;
+        Window->framebufferResized = false;
         recreateSwapChain();
     }
     else if (result != VK_SUCCESS)
@@ -990,9 +990,9 @@ void NewEngineVulkan::drawFrame ()
     currentFrame = (currentFrame + 1) % MAX_FRAMES_IN_FLIGHT;
 }
 
-void NewEngineVulkan::idle ()
+void TVulkan::idle ()
 {
     vkDeviceWaitIdle(device);
 }
 
-} // namespace NE
+} // namespace Titan

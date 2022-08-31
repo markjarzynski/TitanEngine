@@ -1,5 +1,5 @@
-#include "NewEngineConfig.h"
-#include "NewEngineApp.h"
+#include "TConfig.h"
+#include "TApp.h"
 
 #include <cstdlib>
 #include <iostream>
@@ -10,13 +10,13 @@
 
 int main (int argc, char** argv)
 {
-    std::cout << NewEngine_PROJECT_NAME << " " << NewEngine_VERSION << std::endl;
+    std::cout << TITAN_PROJECT_NAME << " " << TITAN_VERSION << std::endl;
 
     glm::vec3 a = glm::vec3(1.f, 2.f, 3.f);
     glm::vec3 b = a * 2.f - 1.f;
     std::cout << "[" << b.x << "," << b.y << "," << b.z << "]" << std::endl;
 
-    NE::NewEngineApp app;
+    Titan::TApp app;
 
     try
     {

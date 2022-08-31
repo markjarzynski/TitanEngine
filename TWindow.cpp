@@ -1,9 +1,9 @@
-#include "NewEngineWindow.h"
+#include "TWindow.h"
 
-namespace NE
+namespace Titan
 {
 
-NewEngineWindow::NewEngineWindow (int Width, int Height, std::string Name)
+TWindow::TWindow (int Width, int Height, std::string Name)
     : width(Width), height(Height), name(Name)
 {
     glfwInit();
@@ -15,7 +15,7 @@ NewEngineWindow::NewEngineWindow (int Width, int Height, std::string Name)
     glfwSetFramebufferSizeCallback(window, framebufferResizeCallback);
 }
 
-NewEngineWindow::~NewEngineWindow ()
+TWindow::~TWindow ()
 {
     glfwDestroyWindow(window);
     glfwTerminate();
@@ -23,8 +23,8 @@ NewEngineWindow::~NewEngineWindow ()
 
 static void framebufferResizeCallback(GLFWwindow* window, int width, int height)
 {
-    NewEngineWindow* NEWindow = reinterpret_cast<NewEngineWindow*>(glfwGetWindowUserPointer(window));
-    NEWindow->framebufferResized = true;
+    TWindow* Window = reinterpret_cast<TWindow*>(glfwGetWindowUserPointer(window));
+    Window->framebufferResized = true;
 }
 
-}
+} // namespace Titan

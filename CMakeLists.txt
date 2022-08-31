@@ -7,7 +7,7 @@ project(TitanEngine VERSION 0.1)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQURIED True)
 
-configure_file(TitanEngineConfig.h.in TitanEngineConfig.h)
+configure_file(TConfig.h.in TConfig.h)
 
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/CMake" ${CMAKE_MODULE_PATH})
 message(STATUS "CMAKE_MODULE_PATH: ${CMAKE_MODULE_PATH}")
@@ -27,9 +27,18 @@ set(GLFW_BUILD_TESTS OFF CACHE BOOL "" FORCE)
 set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
 add_subdirectory("Common/ThirdParty/glfw")
 
-
 include_directories(${PROJECT_NAME} ${CMAKE_CURRENT_BINARY_DIR})
-add_executable(${PROJECT_NAME} TitanEngine.cpp TitanEngineApp.h TitanEngineApp.cpp TitanEngineWindow.h TitanEngineWindow.cpp TitanEngineVulkan.h TitanEngineVulkan.cpp Util.h Util.cpp)
+add_executable(${PROJECT_NAME} 
+    TitanEngine.cpp
+    TApp.h
+    TApp.cpp
+    TWindow.h
+    TWindow.cpp
+    TVulkan.h 
+    TVulkan.cpp
+    Util.h
+    Util.cpp
+)
 
 target_include_directories(${PROJECT_NAME} PUBLIC "${Vulkan_INCLUDE_DIRS}")
 target_link_libraries(${PROJECT_NAME} glfw vulkan-1)

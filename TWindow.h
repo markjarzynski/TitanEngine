@@ -8,17 +8,17 @@
 
 #include <string>
 
-namespace NE
+namespace Titan
 {
 
-class NewEngineWindow
+class TWindow
 {
 public:
-    NewEngineWindow(int width, int height, std::string name);
-    ~NewEngineWindow();
+    TWindow(int width, int height, std::string name);
+    ~TWindow();
 
-    NewEngineWindow(const NewEngineWindow &) = delete;
-    NewEngineWindow &operator=(const NewEngineWindow &) = delete;
+    TWindow(const TWindow &) = delete;
+    TWindow &operator=(const TWindow &) = delete;
 
     bool ShouldClose() { return glfwWindowShouldClose(window); }
 
@@ -38,4 +38,4 @@ private:
 
 static void framebufferResizeCallback(GLFWwindow* window, int width, int height);
 
-} // namespace NE
+} // namespace Titan
