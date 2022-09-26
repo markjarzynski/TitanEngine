@@ -1,0 +1,7 @@
+if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+    add_definitions(-DMACOS)
+elseif(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
+    add_definitions(-DLINUX)
+elseif(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
+    add_definitions(-DWindows)
+endif()
