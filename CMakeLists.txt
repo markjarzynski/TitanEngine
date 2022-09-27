@@ -44,4 +44,4 @@ add_executable(${PROJECT_NAME}
 )
 
 target_include_directories(${PROJECT_NAME} PUBLIC "${Vulkan_INCLUDE_DIRS}")
-target_link_libraries(${PROJECT_NAME} glfw vulkan)
+target_link_libraries(${PROJECT_NAME} glfw vulkan-1)

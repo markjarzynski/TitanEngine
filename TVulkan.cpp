@@ -55,10 +55,9 @@ void TVulkan::createInstance ()
     createInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
     createInfo.pApplicationInfo = &appInfo;
 
-    if (enablePortability)
-    {
-        createInfo.flags = VK_INSTANCE_CREATE_ENUMERATE_PORTABILITY_BIT_KHR;
-    }
+#ifdef PORTABILITY
+    createInfo.flags = VK_INSTANCE_CREATE_ENUMERATE_PORTABILITY_BIT_KHR;
+#endif
 
     auto extensions = getRequiredExtensions();
     createInfo.enabledExtensionCount = static_cast<uint32_t>(extensions.size());
@@ -151,11 +150,10 @@ std::vector<const char*> TVulkan::getRequiredExtensions ()
         extensions.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
     }
 
-    if (enablePortability)
-    {
-        extensions.push_back(VK_KHR_PORTABILITY_ENUMERATION_EXTENSION_NAME);
-        //extensions.push_back("VK_KHR_portability_subset");
-    }
+#ifdef PORTABILITY
+    extensions.push_back(VK_KHR_PORTABILITY_ENUMERATION_EXTENSION_NAME);
+    //extensions.push_back("VK_KHR_portability_subset");
+#endif
 
     return extensions;
 }
@@ -326,11 +324,9 @@ void TVulkan::createLogicalDevice ()
 
     createInfo.pEnabledFeatures = &deviceFeatures;
 
-    if (enablePortability)
-    {
-        //std::string portabilitySubsetName = "VK_KHR_portability_subset";
-        //deviceExtensions.push_back(VK_KHR_PORTABILITY_SUBSET_EXTENSION_NAME);
-    }
+#ifdef PORTABILITY
+    //deviceExtensions.push_back(VK_KHR_PORTABILITY_SUBSET_EXTENSION_NAME);
+#endif
 
     createInfo.enabledExtensionCount = static_cast<uint32_t>(deviceExtensions.size());
     createInfo.ppEnabledExtensionNames = deviceExtensions.data();
