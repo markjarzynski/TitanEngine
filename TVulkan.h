@@ -17,6 +17,10 @@
 #include <limits>
 #include <algorithm>
 
+#ifdef MACOS
+#define PORTABILITY
+#endif
+
 namespace Titan
 {
 
@@ -42,12 +46,6 @@ public:
         const bool enableValidationLayers = false;
     #else
         const bool enableValidationLayers = true;
-    #endif
-
-    #ifdef MACOS
-        const bool enablePortability = true;
-    #else
-        const bool enablePortability = false;
     #endif
 
 private:
