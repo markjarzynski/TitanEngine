@@ -19,7 +19,6 @@ include_directories(${PROJECT_NAME} PUBLIC ${GLM_INCLUDE_DIRS})
 
 # vulkan
 find_package(Vulkan REQUIRED)
-link_directories(${Vulkan_INCLUDE_DIR}/../Bin ${Vulkan_INCLUDE_DIR}/../Lib)
 
 # glfw
 set(GLFW_BUILD_DOCS OFF CACHE BOOL "" FORCE)
@@ -43,5 +42,4 @@ add_executable(${PROJECT_NAME}
     Util.cpp
 )
 
-target_include_directories(${PROJECT_NAME} PUBLIC "${Vulkan_INCLUDE_DIRS}")
-target_link_libraries(${PROJECT_NAME} glfw vulkan)
+target_link_libraries(${PROJECT_NAME} glfw Vulkan::Vulkan)
