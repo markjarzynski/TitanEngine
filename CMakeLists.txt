@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.20)
 
 # set the project name and version
-project(TitanEngine VERSION 0.1)
+project(TitanEngine VERSION 0.2)
 
 # specify the C++ standard
 set(CMAKE_CXX_STANDARD 17)
@@ -28,18 +28,23 @@ add_subdirectory("Common/ThirdParty/glfw")
 
 include("Platform")
 
+add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/Core")
+add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/Graphics")
 
-include_directories(${PROJECT_NAME} ${CMAKE_CURRENT_BINARY_DIR})
-add_executable(${PROJECT_NAME} 
-    TitanEngine.cpp
-    TApp.h
-    TApp.cpp
-    TWindow.h
-    TWindow.cpp
-    TVulkan.h 
-    TVulkan.cpp
-    Util.h
-    Util.cpp
+include_directories(${PROJECT_NAME}
+    ${CMAKE_CURRENT_BINARY_DIR}
+    ${CMAKE_CURRENT_SOURCE_DIR}/Core
+    ${CMAKE_CURRENT_SOURCE_DIR}/Graphics
 )
 
-target_link_libraries(${PROJECT_NAME} glfw Vulkan::Vulkan)
+add_executable(${PROJECT_NAME} 
+    TitanEngine.cpp TApp.cpp
+)
+
+target_link_libraries( ${PROJECT_NAME}
+    PRIVATE
+        glfw
+        Vulkan::Vulkan
+        Titan::Core
+        Titan::Graphics
+)

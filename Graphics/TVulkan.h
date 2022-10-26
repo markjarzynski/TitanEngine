@@ -5,7 +5,7 @@
 #include <GLFW/glfw3.h>
 
 #include "TWindow.h"
-#include "Util.h"
+#include "../Core/Util.h"
 
 #include <stdexcept>
 #include <iostream>
