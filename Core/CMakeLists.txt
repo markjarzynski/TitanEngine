@@ -24,4 +24,6 @@ set_target_properties(${PROJECT_NAME}
         FOLDER "Titan"
 )
 
+target_link_libraries(${PROJECT_NAME})
+
 set_property(DIRECTORY PROPERTY VS_STARTUP_PROJECT ${PROJECT_NAME})

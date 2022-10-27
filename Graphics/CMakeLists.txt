@@ -24,7 +24,7 @@ set_target_properties(${PROJECT_NAME}
         FOLDER "Titan"
 )
 
-
+include_directories(${Core_SOURCE_DIR})
 
 target_link_libraries( ${PROJECT_NAME}
     PRIVATE
