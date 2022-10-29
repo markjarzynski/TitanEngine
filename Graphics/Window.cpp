@@ -2,6 +2,8 @@
 
 namespace Titan
 {
+namespace Graphics
+{
 
 Window::Window (int Width, int Height, std::string Name)
     : width(Width), height(Height), name(Name)
@@ -27,4 +29,5 @@ static void framebufferResizeCallback(GLFWwindow* glfw_window, int width, int he
     window->framebufferResized = true;
 }
 
+} // namespace Graphics
 } // namespace Titan

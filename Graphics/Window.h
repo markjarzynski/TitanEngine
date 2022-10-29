@@ -7,7 +7,8 @@
 
 namespace Titan
 {
-
+namespace Graphics
+{
 class Window
 {
 public:
@@ -35,4 +36,5 @@ private:
 
 static void framebufferResizeCallback(GLFWwindow* glfw_window, int width, int height);
 
+} // namespace Graphics
 } // namespace Titan

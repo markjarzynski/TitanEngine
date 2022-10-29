@@ -8,20 +8,20 @@ file(GLOB SourceFiles LIST_DIRECTORIES FALSE
 )
 
 add_library(${PROJECT_NAME}
-    STATIC 
-        ${SourceFiles}
+STATIC 
+    ${SourceFiles}
 )
 add_library("Titan::${PROJECT_NAME}" ALIAS ${PROJECT_NAME})
 
 target_sources(${PROJECT_NAME}
-    PRIVATE
+PRIVATE
     ${SourceFiles}
 )
 
 set_target_properties(${PROJECT_NAME} 
-    PROPERTIES 
-        LINKER_LANGUAGE CXX 
-        FOLDER "Titan"
+PROPERTIES 
+    LINKER_LANGUAGE CXX 
+    FOLDER "Titan"
 )
 
 target_link_libraries(${PROJECT_NAME})

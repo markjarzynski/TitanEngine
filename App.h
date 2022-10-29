@@ -1,7 +1,9 @@
 #pragma once
 
 #include "Window.h"
+#ifdef VULKAN
 #include "Vulkan.h"
+#endif
 
 #include <string>
 
@@ -20,8 +22,10 @@ public:
 
 private:
 
-    Window window {WIDTH, HEIGHT, "Titan Engine"};
-    Vulkan vulkan {&window};
+    Graphics::Window window {WIDTH, HEIGHT, "Titan Engine"};
+#ifdef VULKAN
+    Graphics::Vulkan vulkan {&window};
+#endif
 };
 
 } // namespace Titan

@@ -2,6 +2,8 @@
 
 namespace Titan
 {
+namespace Graphics
+{
 
 Vulkan::Vulkan (Window* window)
     : window(window)
@@ -1010,4 +1012,5 @@ void Vulkan::idle ()
     vkDeviceWaitIdle(device);
 }
 
+} // namespace Graphics
 } // namespace Titan

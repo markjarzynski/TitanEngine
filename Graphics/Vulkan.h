@@ -23,6 +23,8 @@
 
 namespace Titan
 {
+namespace Graphics
+{
 
 class Vulkan
 {
@@ -156,4 +158,5 @@ private:
     void destroySyncObjects();
 };
 
+} // namespace Graphics
 } // namespace Titan
