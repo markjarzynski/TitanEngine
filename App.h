@@ -1,17 +1,17 @@
 #pragma once
 
-#include "TWindow.h"
-#include "TVulkan.h"
+#include "Window.h"
+#include "Vulkan.h"
 
 #include <string>
 
 namespace Titan
 {
 
-class TApp
+class App
 {
 public:
-    TApp() {}
+    App() {}
 
     static constexpr int WIDTH = 800;
     static constexpr int HEIGHT = 600;
@@ -20,8 +20,8 @@ public:
 
 private:
 
-    TWindow Window {WIDTH, HEIGHT, "Titan Engine"};
-    TVulkan Vulkan {&Window};
+    Window window {WIDTH, HEIGHT, "Titan Engine"};
+    Vulkan vulkan {&window};
 };
 
 } // namespace Titan

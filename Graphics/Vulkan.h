@@ -4,7 +4,7 @@
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
 
-#include "TWindow.h"
+#include "Window.h"
 #include "Util.h"
 
 #include <stdexcept>
@@ -24,19 +24,19 @@
 namespace Titan
 {
 
-class TVulkan
+class Vulkan
 {
 public:
-    TVulkan(TWindow* Window);
-    ~TVulkan();
+    Vulkan(Window* Window);
+    ~Vulkan();
 
-    TVulkan(const TVulkan &) = delete;
-    TVulkan &operator=(const TVulkan &) = delete;
+    Vulkan(const Vulkan &) = delete;
+    Vulkan &operator=(const Vulkan &) = delete;
 
     void drawFrame();
     void idle();
 
-    TWindow* Window;
+    Window* window;
 
     const std::vector<const char*> validationLayers = {
         "VK_LAYER_KHRONOS_validation"

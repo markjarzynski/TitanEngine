@@ -1,12 +1,11 @@
-#include "TConfig.h"
-#include "TApp.h"
+#include "Config.h"
+#include "App.h"
 
 #include <cstdlib>
 #include <iostream>
 #include <stdexcept>
 
 #include <glm/glm.hpp>
-
 
 int main (int argc, char** argv)
 {
@@ -16,7 +15,7 @@ int main (int argc, char** argv)
     glm::vec3 b = a * 2.f - 1.f;
     std::cout << "[" << b.x << "," << b.y << "," << b.z << "]" << std::endl;
 
-    Titan::TApp app;
+    Titan::App app;
 
     try
     {

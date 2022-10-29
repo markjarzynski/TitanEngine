@@ -7,7 +7,7 @@ project(TitanEngine VERSION 0.2)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQURIED True)
 
-configure_file(TConfig.h.in TConfig.h)
+configure_file(Config.h.in Config.h)
 
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/CMake" ${CMAKE_MODULE_PATH})
 message(STATUS "CMAKE_MODULE_PATH: ${CMAKE_MODULE_PATH}")
@@ -38,7 +38,7 @@ include_directories(${PROJECT_NAME}
 )
 
 add_executable(${PROJECT_NAME} 
-    TitanEngine.cpp TApp.cpp
+    TitanEngine.cpp App.cpp
 )
 
 target_link_libraries( ${PROJECT_NAME}

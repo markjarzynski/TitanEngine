@@ -1,10 +1,10 @@
-#include "TVulkan.h"
+#include "Vulkan.h"
 
 namespace Titan
 {
 
-TVulkan::TVulkan (TWindow* window)
-    : Window(window)
+Vulkan::Vulkan (Window* window)
+    : window(window)
 {
     createInstance();
     setupDebugMessenger();
@@ -21,7 +21,7 @@ TVulkan::TVulkan (TWindow* window)
     createSyncObjects();
 }
 
-TVulkan::~TVulkan ()
+Vulkan::~Vulkan ()
 {
     destroySyncObjects();
     destroyCommandPool();
@@ -36,7 +36,7 @@ TVulkan::~TVulkan ()
     destroyInstance();
 }
 
-void TVulkan::createInstance ()
+void Vulkan::createInstance ()
 {
     if (enableValidationLayers && !checkValidationLayerSupport())
     {
@@ -86,12 +86,12 @@ void TVulkan::createInstance ()
     }
 }
 
-void TVulkan::destroyInstance ()
+void Vulkan::destroyInstance ()
 {
     vkDestroyInstance(instance, nullptr);
 }
 
-void TVulkan::enumerateExtensions ()
+void Vulkan::enumerateExtensions ()
 {
     uint32_t extensionCount = 0;
     vkEnumerateInstanceExtensionProperties(nullptr, &extensionCount, nullptr);
@@ -107,7 +107,7 @@ void TVulkan::enumerateExtensions ()
     }
 }
 
-bool TVulkan::checkValidationLayerSupport ()
+bool Vulkan::checkValidationLayerSupport ()
 {
     uint32_t layerCount;
     vkEnumerateInstanceLayerProperties(&layerCount, nullptr);
@@ -137,7 +137,7 @@ bool TVulkan::checkValidationLayerSupport ()
     return true;
 }
 
-std::vector<const char*> TVulkan::getRequiredExtensions ()
+std::vector<const char*> Vulkan::getRequiredExtensions ()
 {
     uint32_t glfwExtensionCount = 0;
     const char** glfwExtensions;
@@ -158,13 +158,13 @@ std::vector<const char*> TVulkan::getRequiredExtensions ()
     return extensions;
 }
 
-VKAPI_ATTR VkBool32 VKAPI_CALL TVulkan::debugCallback (VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity, VkDebugUtilsMessageTypeFlagsEXT messageType, const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData, void* pUserData)
+VKAPI_ATTR VkBool32 VKAPI_CALL Vulkan::debugCallback (VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity, VkDebugUtilsMessageTypeFlagsEXT messageType, const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData, void* pUserData)
 {
     std::cerr << "validation layer: " << pCallbackData->pMessage << std::endl;
     return VK_FALSE;
 }
 
-void TVulkan::setupDebugMessenger ()
+void Vulkan::setupDebugMessenger ()
 {
     if (!enableValidationLayers) return;
 
@@ -177,14 +177,14 @@ void TVulkan::setupDebugMessenger ()
     }
 }
 
-void TVulkan::destroyDebugMessenger ()
+void Vulkan::destroyDebugMessenger ()
 {
     if (!enableValidationLayers) return;
     
     DestroyDebugUtilsMessengerEXT(instance, debugMessenger, nullptr);
 }
 
-VkResult TVulkan::CreateDebugUtilsMessengerEXT (VkInstance instance, const VkDebugUtilsMessengerCreateInfoEXT* pCreateInfo, const VkAllocationCallbacks* pAllocator, VkDebugUtilsMessengerEXT* pDebugMessenger)
+VkResult Vulkan::CreateDebugUtilsMessengerEXT (VkInstance instance, const VkDebugUtilsMessengerCreateInfoEXT* pCreateInfo, const VkAllocationCallbacks* pAllocator, VkDebugUtilsMessengerEXT* pDebugMessenger)
 {
     auto func = (PFN_vkCreateDebugUtilsMessengerEXT) vkGetInstanceProcAddr(instance, "vkCreateDebugUtilsMessengerEXT");
     if (func != nullptr)
@@ -197,7 +197,7 @@ VkResult TVulkan::CreateDebugUtilsMessengerEXT (VkInstance instance, const VkDeb
     }
 }
 
-void TVulkan::DestroyDebugUtilsMessengerEXT (VkInstance instance, VkDebugUtilsMessengerEXT debugMessenger, const VkAllocationCallbacks* pAllocator)
+void Vulkan::DestroyDebugUtilsMessengerEXT (VkInstance instance, VkDebugUtilsMessengerEXT debugMessenger, const VkAllocationCallbacks* pAllocator)
 {
     auto func = (PFN_vkDestroyDebugUtilsMessengerEXT) vkGetInstanceProcAddr(instance, "vkDestroyDebugUtilsMessengerEXT");
     if (func != nullptr)
@@ -206,7 +206,7 @@ void TVulkan::DestroyDebugUtilsMessengerEXT (VkInstance instance, VkDebugUtilsMe
     }
 }
 
-void TVulkan::populateDebugMessengerCreateInfo (VkDebugUtilsMessengerCreateInfoEXT& createInfo)
+void Vulkan::populateDebugMessengerCreateInfo (VkDebugUtilsMessengerCreateInfoEXT& createInfo)
 {
     createInfo = {};
     createInfo.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
@@ -215,7 +215,7 @@ void TVulkan::populateDebugMessengerCreateInfo (VkDebugUtilsMessengerCreateInfoE
     createInfo.pfnUserCallback = debugCallback;
 }
 
-void TVulkan::pickPhysicalDevice ()
+void Vulkan::pickPhysicalDevice ()
 {
     uint32_t deviceCount = 0;
     vkEnumeratePhysicalDevices(instance, &deviceCount, nullptr);
@@ -243,7 +243,7 @@ void TVulkan::pickPhysicalDevice ()
     }
 }
 
-bool TVulkan::isDeviceSuitable (VkPhysicalDevice device)
+bool Vulkan::isDeviceSuitable (VkPhysicalDevice device)
 {
     QueueFamilyIndices indices = findQueueFamilies(device);
 
@@ -259,7 +259,7 @@ bool TVulkan::isDeviceSuitable (VkPhysicalDevice device)
     return indices.isComplete() && extensionsSupported && swapChainAdequate;
 }
 
-TVulkan::QueueFamilyIndices TVulkan::findQueueFamilies (VkPhysicalDevice device)
+Vulkan::QueueFamilyIndices Vulkan::findQueueFamilies (VkPhysicalDevice device)
 {
     QueueFamilyIndices indices;
 
@@ -296,7 +296,7 @@ TVulkan::QueueFamilyIndices TVulkan::findQueueFamilies (VkPhysicalDevice device)
     return indices;
 }
 
-void TVulkan::createLogicalDevice ()
+void Vulkan::createLogicalDevice ()
 {
     QueueFamilyIndices indices = findQueueFamilies(physicalDevice);
 
@@ -350,24 +350,24 @@ void TVulkan::createLogicalDevice ()
     vkGetDeviceQueue(device, indices.graphicsFamily.value(), 0, &graphicsQueue);
 }
 
-void TVulkan::destroyDevice ()
+void Vulkan::destroyDevice ()
 {
     vkDestroyDevice(device, nullptr);
 }
 
-void TVulkan::createSurface ()
+void Vulkan::createSurface ()
 {
-    if (glfwCreateWindowSurface(instance, Window->getWindow(), nullptr, &surface) != VK_SUCCESS) {
+    if (glfwCreateWindowSurface(instance, window->getWindow(), nullptr, &surface) != VK_SUCCESS) {
         throw std::runtime_error("[ERROR]: Vulkan Failed to create window surface!");
     }
 }
 
-void TVulkan::destroySurface ()
+void Vulkan::destroySurface ()
 {
     vkDestroySurfaceKHR(instance, surface, nullptr);
 }
 
-bool TVulkan::checkDeviceExtensionSupport (VkPhysicalDevice device)
+bool Vulkan::checkDeviceExtensionSupport (VkPhysicalDevice device)
 {
     uint32_t extensionCount;
     vkEnumerateDeviceExtensionProperties(device, nullptr, &extensionCount, nullptr);
@@ -384,7 +384,7 @@ bool TVulkan::checkDeviceExtensionSupport (VkPhysicalDevice device)
     return requiredExtensions.empty();
 }
 
-TVulkan::SwapChainSupportDetails TVulkan::querySwapChainSupport (VkPhysicalDevice device)
+Vulkan::SwapChainSupportDetails Vulkan::querySwapChainSupport (VkPhysicalDevice device)
 {
     SwapChainSupportDetails details;
 
@@ -411,7 +411,7 @@ TVulkan::SwapChainSupportDetails TVulkan::querySwapChainSupport (VkPhysicalDevic
     return details;
 }
 
-VkSurfaceFormatKHR TVulkan::chooseSwapSurfaceFormat (const std::vector<VkSurfaceFormatKHR>& availableFormats)
+VkSurfaceFormatKHR Vulkan::chooseSwapSurfaceFormat (const std::vector<VkSurfaceFormatKHR>& availableFormats)
 {
     for (const auto& availableFormat : availableFormats)
     {
@@ -424,7 +424,7 @@ VkSurfaceFormatKHR TVulkan::chooseSwapSurfaceFormat (const std::vector<VkSurface
     return availableFormats[0];
 }
 
-VkPresentModeKHR TVulkan::chooseSwapPresentMode (const std::vector<VkPresentModeKHR>& availablePresentModes)
+VkPresentModeKHR Vulkan::chooseSwapPresentMode (const std::vector<VkPresentModeKHR>& availablePresentModes)
 {
     for (const auto& availablePresentMode : availablePresentModes)
     {
@@ -437,7 +437,7 @@ VkPresentModeKHR TVulkan::chooseSwapPresentMode (const std::vector<VkPresentMode
     return VK_PRESENT_MODE_FIFO_KHR;
 }
 
-VkExtent2D TVulkan::chooseSwapExtent (const VkSurfaceCapabilitiesKHR& capabilities)
+VkExtent2D Vulkan::chooseSwapExtent (const VkSurfaceCapabilitiesKHR& capabilities)
 {
     /*if (capabilities.currentExtent.width != UINT32_MAX)
     {
@@ -447,7 +447,7 @@ VkExtent2D TVulkan::chooseSwapExtent (const VkSurfaceCapabilitiesKHR& capabiliti
     */
     {
         int width, height;
-        glfwGetFramebufferSize(Window->getWindow(), &width, &height);
+        glfwGetFramebufferSize(window->getWindow(), &width, &height);
 
         VkExtent2D actualExtent = {
             static_cast<uint32_t>(width),
@@ -461,7 +461,7 @@ VkExtent2D TVulkan::chooseSwapExtent (const VkSurfaceCapabilitiesKHR& capabiliti
     }
 }
 
-void TVulkan::createSwapChain ()
+void Vulkan::createSwapChain ()
 {
     SwapChainSupportDetails swapChainSupport = querySwapChainSupport(physicalDevice);
 
@@ -523,15 +523,15 @@ void TVulkan::createSwapChain ()
     swapChainExtent = extent;
 }
 
-void TVulkan::recreateSwapChain ()
+void Vulkan::recreateSwapChain ()
 {
     int width = 0, height = 0;
-    glfwGetFramebufferSize(Window->getWindow(), &width, &height);
+    glfwGetFramebufferSize(window->getWindow(), &width, &height);
 
     // while the window is minimized.
     while (width == 0 || height == 0)
     {
-        glfwGetFramebufferSize(Window->getWindow(), &width, &height);
+        glfwGetFramebufferSize(window->getWindow(), &width, &height);
         glfwWaitEvents();
     }
 
@@ -546,12 +546,12 @@ void TVulkan::recreateSwapChain ()
     createFrameBuffers();
 }
 
-void TVulkan::destroySwapChain ()
+void Vulkan::destroySwapChain ()
 {
     vkDestroySwapchainKHR(device, swapChain, nullptr);
 }
 
-void TVulkan::createImageViews ()
+void Vulkan::createImageViews ()
 {
     swapChainImageViews.resize(swapChainImages.size());
 
@@ -582,7 +582,7 @@ void TVulkan::createImageViews ()
     }
 }
 
-void TVulkan::destroyImageViews ()
+void Vulkan::destroyImageViews ()
 {
     for (auto imageView : swapChainImageViews)
     {
@@ -590,7 +590,7 @@ void TVulkan::destroyImageViews ()
     }
 }
 
-void TVulkan::createGraphicsPipeline ()
+void Vulkan::createGraphicsPipeline ()
 {
     auto vertShaderCode = readFile("shaders/vert.spv");
     auto fragShaderCode = readFile("shaders/frag.spv");
@@ -708,13 +708,13 @@ void TVulkan::createGraphicsPipeline ()
     vkDestroyShaderModule(device, vertShaderModule, nullptr);
 }
 
-void TVulkan::destroyGraphicsPipeline ()
+void Vulkan::destroyGraphicsPipeline ()
 {
     vkDestroyPipeline(device, graphicsPipeline, nullptr);
     vkDestroyPipelineLayout(device, pipelineLayout, nullptr);
 }
 
-VkShaderModule TVulkan::createShaderModule (const std::vector<char>& code)
+VkShaderModule Vulkan::createShaderModule (const std::vector<char>& code)
 {
     VkShaderModuleCreateInfo createInfo{};
     createInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
@@ -730,7 +730,7 @@ VkShaderModule TVulkan::createShaderModule (const std::vector<char>& code)
     return shaderModule;
 }
 
-void TVulkan::createRenderPass ()
+void Vulkan::createRenderPass ()
 {
     VkAttachmentDescription colorAttachment{};
     colorAttachment.format = swapChainImageFormat;
@@ -774,13 +774,13 @@ void TVulkan::createRenderPass ()
     }
 }
 
-void TVulkan::destroyRenderPass ()
+void Vulkan::destroyRenderPass ()
 {
     //vkDestroyPipelineLayout(device, pipelineLayout, nullptr);
     vkDestroyRenderPass(device, renderPass, nullptr);
 }
 
-void TVulkan::createFrameBuffers ()
+void Vulkan::createFrameBuffers ()
 {
     swapChainFramebuffers.resize(swapChainImageViews.size());
 
@@ -806,7 +806,7 @@ void TVulkan::createFrameBuffers ()
     }
 }
 
-void TVulkan::destroyFrameBuffers ()
+void Vulkan::destroyFrameBuffers ()
 {
     for (auto framebuffer : swapChainFramebuffers)
     {
@@ -815,7 +815,7 @@ void TVulkan::destroyFrameBuffers ()
 }
 
 
-void TVulkan::createCommandPool ()
+void Vulkan::createCommandPool ()
 {
     QueueFamilyIndices queueFamilyIndices = findQueueFamilies(physicalDevice);
 
@@ -830,13 +830,13 @@ void TVulkan::createCommandPool ()
     }
 }
 
-void TVulkan::destroyCommandPool ()
+void Vulkan::destroyCommandPool ()
 {
 
     vkDestroyCommandPool(device, commandPool, nullptr);
 }
 
-void TVulkan::createCommandBuffers ()
+void Vulkan::createCommandBuffers ()
 {
     commandBuffers.resize(MAX_FRAMES_IN_FLIGHT);
 
@@ -852,7 +852,7 @@ void TVulkan::createCommandBuffers ()
     }
 }
 
-void TVulkan::recordCommandBuffer (VkCommandBuffer commandBuffer, uint32_t imageIndex)
+void Vulkan::recordCommandBuffer (VkCommandBuffer commandBuffer, uint32_t imageIndex)
 {
     VkCommandBufferBeginInfo beginInfo{};
     beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
@@ -902,7 +902,7 @@ void TVulkan::recordCommandBuffer (VkCommandBuffer commandBuffer, uint32_t image
     }
 }
 
-void TVulkan::createSyncObjects ()
+void Vulkan::createSyncObjects ()
 {
     imageAvailableSemaphores.resize(MAX_FRAMES_IN_FLIGHT);
     renderFinishedSemaphores.resize(MAX_FRAMES_IN_FLIGHT);
@@ -926,7 +926,7 @@ void TVulkan::createSyncObjects ()
     }
 }
 
-void TVulkan::destroySyncObjects ()
+void Vulkan::destroySyncObjects ()
 {
     for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
     {
@@ -936,7 +936,7 @@ void TVulkan::destroySyncObjects ()
     }
 }
 
-void TVulkan::drawFrame ()
+void Vulkan::drawFrame ()
 {
     vkWaitForFences(device, 1, &inFlightFences[currentFrame], VK_TRUE, UINT64_MAX);
 
@@ -992,9 +992,9 @@ void TVulkan::drawFrame ()
 
     result = vkQueuePresentKHR(presentQueue, &presentInfo);
 
-    if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR || Window->framebufferResized)
+    if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR || window->framebufferResized)
     {
-        Window->framebufferResized = false;
+        window->framebufferResized = false;
         recreateSwapChain();
     }
     else if (result != VK_SUCCESS)
@@ -1005,7 +1005,7 @@ void TVulkan::drawFrame ()
     currentFrame = (currentFrame + 1) % MAX_FRAMES_IN_FLIGHT;
 }
 
-void TVulkan::idle ()
+void Vulkan::idle ()
 {
     vkDeviceWaitIdle(device);
 }
