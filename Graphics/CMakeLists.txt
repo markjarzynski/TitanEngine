@@ -25,6 +25,11 @@ elseif(GraphicsAPI MATCHES "D3D12")
         "${CMAKE_CURRENT_SOURCE_DIR}/Direct3D12.h"
         "${CMAKE_CURRENT_SOURCE_DIR}/Direct3D12.cpp"
     )
+elseif(GraphicsAPI MATCHES "Metal")
+    list(APPEND SourceFiles
+        "${CMAKE_CURRENT_SOURCE_DIR}/Metal.h"
+        "${CMAKE_CURRENT_SOURCE_DIR}/Metal.cpp"
+    )
 endif()
 
 
