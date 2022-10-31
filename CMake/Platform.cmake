@@ -11,6 +11,8 @@ set_property(CACHE GraphicsAPI PROPERTY STRINGS "Vulkan" "Direct3D12" "Metal")
 
 if(GraphicsAPI MATCHES "Vulkan")
     add_definitions(-DVULKAN)
+elseif(GraphicsAPI MATCHES "Metal")
+    add_definitions(-DMETAL)
 endif()
 
 message(STATUS TEST ${GraphicsAPI})
