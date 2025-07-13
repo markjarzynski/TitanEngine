@@ -11,49 +11,16 @@
             "program": "${command:cmake.launchTargetPath}",
             "args": [],
             "stopAtEntry": false,
-            "cwd": "${workspaceFolder}/build",
+            "cwd": "${workspaceFolder}/build/Debug",
             "environment": [
                 {
                     // add the directory where our target was built to the PATHs
                     // it gets resolved by CMake Tools:
                     "name": "PATH",
-                    "value": "$PATH:${command:cmake.launchTargetDirectory}"  
+                    "value": "$PATH:${command:cmake.getLaunchTargetDirectory}"  
                 }
             ],
-            "console": "externalTerminal",
-            "preLaunchTask": "cmake build active file"
-        },
-        {
-            "name": "(gdb) Launch",
-            "type": "cppdbg",
-            "request": "launch",
-            "program": "${command:cmake.launchTargetPath}",
-            "args": [],
-            "stopAtEntry": false,
-            "cwd": "${workspaceFolder}",
-            "environment": [
-                {
-                    // add the directory where our target was built to the PATHs
-                    // it gets resolved by CMake Tools:
-                    "name": "PATH",
-                    "value": "$PATH:${command:cmake.launchTargetDirectory}"  
-                }
-            ],
-            "externalConsole": true,
-            "MIMode": "gdb",
-            "miDebuggerPath": "c:\\MinGW\\bin\\gdb.exe",
-            "setupCommands": [
-                {
-                    "description": "Enable pretty-printing for gdb",
-                    "text": "-enable-pretty-printing",
-                    "ignoreFailures": true
-                },
-                {
-                    "description":  "Set Disassembly Flavor to Intel",
-                    "text": "-gdb-set disassembly-flavor intel",
-                    "ignoreFailures": true
-                }
-            ]
+            "console": "externalTerminal"
         },
         {
             "name": "(MacOS) Launch",
@@ -72,8 +39,7 @@
                 }
             ],
             "externalConsole": false,
-            "MIMode": "lldb",
-            "preLaunchTask": "cmake build active file"
-          }
+            "MIMode": "lldb"
+        }
     ]
 }
