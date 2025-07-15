@@ -16,7 +16,7 @@ Vulkan::Vulkan (Window* window)
     createSwapChain();
     createImageViews();
     createRenderPass();
-    createGraphicsPipeline();
+    createGraphicsPipelines();
     createFrameBuffers();
     createCommandPool();
     createCommandBuffers();
@@ -28,7 +28,7 @@ Vulkan::~Vulkan ()
     destroySyncObjects();
     destroyCommandPool();
     destroyFrameBuffers();
-    destroyGraphicsPipeline();
+    destroyGraphicsPipelines();
     destroyRenderPass();
     destroyImageViews();
     destroySwapChain();
@@ -592,10 +592,23 @@ void Vulkan::destroyImageViews ()
     }
 }
 
-void Vulkan::createGraphicsPipeline ()
+void Vulkan::createGraphicsPipelines()
 {
-    auto vertShaderCode = readFile("shaders/vert.spv");
-    auto fragShaderCode = readFile("shaders/frag.spv");
+    std::string path = "shaders/hash_functions";
+    std::string vert_shader_file = "shaders/vert.spv";
+    std::string frag_shader_file;
+
+    for (const auto& entry : std::filesystem::directory_iterator(path))
+    {
+        frag_shader_file = entry.path().string();
+        createGraphicsPipeline(graphics_pipelines++, vert_shader_file, frag_shader_file);
+    }
+}
+
+void Vulkan::createGraphicsPipeline (uint32_t graphics_pipeline_index, std::string vert_shader_file, std::string frag_shader_file)
+{
+    auto vertShaderCode = readFile(vert_shader_file);
+    auto fragShaderCode = readFile(frag_shader_file);
 
     VkShaderModule vertShaderModule = createShaderModule(vertShaderCode);
     VkShaderModule fragShaderModule = createShaderModule(fragShaderCode);
@@ -681,7 +694,7 @@ void Vulkan::createGraphicsPipeline ()
     VkPipelineLayoutCreateInfo pipelineLayoutInfo{};
     pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
 
-    if (vkCreatePipelineLayout(device, &pipelineLayoutInfo, nullptr, &pipelineLayout) != VK_SUCCESS)
+    if (vkCreatePipelineLayout(device, &pipelineLayoutInfo, nullptr, &pipelineLayout[graphics_pipeline_index]) != VK_SUCCESS)
     {
         throw std::runtime_error("[ERROR]: Failed to create pipeline layout.");
     }
@@ -697,11 +710,11 @@ void Vulkan::createGraphicsPipeline ()
     pipelineInfo.pMultisampleState = &multisampling;
     pipelineInfo.pColorBlendState = &colorBlending;
     pipelineInfo.pDynamicState = &dynamicState;
-    pipelineInfo.layout = pipelineLayout;
+    pipelineInfo.layout = pipelineLayout[graphics_pipeline_index];
     pipelineInfo.renderPass = renderPass;
     pipelineInfo.subpass = 0;
 
-    if (vkCreateGraphicsPipelines(device, VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &graphicsPipeline) != VK_SUCCESS)
+    if (vkCreateGraphicsPipelines(device, VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &graphicsPipeline[graphics_pipeline_index]) != VK_SUCCESS)
     {
         throw std::runtime_error("[ERROR]: Failed to create graphics pipeline.");
     }
@@ -710,10 +723,18 @@ void Vulkan::createGraphicsPipeline ()
     vkDestroyShaderModule(device, vertShaderModule, nullptr);
 }
 
-void Vulkan::destroyGraphicsPipeline ()
+void Vulkan::destroyGraphicsPipelines()
 {
-    vkDestroyPipeline(device, graphicsPipeline, nullptr);
-    vkDestroyPipelineLayout(device, pipelineLayout, nullptr);
+    for (uint32_t i = 0; i < graphics_pipelines; i++)
+    {
+        destroyGraphicsPipeline(i);
+    }
+}
+
+void Vulkan::destroyGraphicsPipeline (uint32_t graphics_pipeline_index)
+{
+    vkDestroyPipeline(device, graphicsPipeline[graphics_pipeline_index], nullptr);
+    vkDestroyPipelineLayout(device, pipelineLayout[graphics_pipeline_index], nullptr);
 }
 
 VkShaderModule Vulkan::createShaderModule (const std::vector<char>& code)
@@ -854,7 +875,7 @@ void Vulkan::createCommandBuffers ()
     }
 }
 
-void Vulkan::recordCommandBuffer (VkCommandBuffer commandBuffer, uint32_t imageIndex)
+void Vulkan::recordCommandBuffer (VkCommandBuffer commandBuffer, uint32_t imageIndex, uint32_t graphics_pipeline_index)
 {
     VkCommandBufferBeginInfo beginInfo{};
     beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
@@ -878,7 +899,7 @@ void Vulkan::recordCommandBuffer (VkCommandBuffer commandBuffer, uint32_t imageI
     renderPassInfo.pClearValues = &clearColor;
 
     vkCmdBeginRenderPass(commandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
-    vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, graphicsPipeline);
+    vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, graphicsPipeline[graphics_pipeline_index]);
 
     VkViewport viewport{};
     viewport.x = 0.0f;
@@ -938,7 +959,7 @@ void Vulkan::destroySyncObjects ()
     }
 }
 
-void Vulkan::drawFrame ()
+void Vulkan::drawFrame (uint32_t graphics_pipeline_index)
 {
     vkWaitForFences(device, 1, &inFlightFences[currentFrame], VK_TRUE, UINT64_MAX);
 
@@ -958,7 +979,7 @@ void Vulkan::drawFrame ()
     vkResetFences(device, 1, &inFlightFences[currentFrame]);
 
     vkResetCommandBuffer(commandBuffers[currentFrame], 0);
-    recordCommandBuffer(commandBuffers[currentFrame], imageIndex);
+    recordCommandBuffer(commandBuffers[currentFrame], imageIndex, graphics_pipeline_index);
 
     VkSubmitInfo submitInfo{};
     submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;

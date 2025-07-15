@@ -73,6 +73,8 @@
         "*.in": "cpp",
         "mutex": "cpp",
         "stop_token": "cpp",
-        "thread": "cpp"
+        "thread": "cpp",
+        "filesystem": "cpp",
+        "span": "cpp"
     }
 }

@@ -16,6 +16,7 @@
 #include <cstdint>
 #include <limits>
 #include <algorithm>
+#include <filesystem>
 
 #ifdef MACOS
 #define PORTABILITY
@@ -26,6 +27,11 @@ namespace Titan
 namespace Graphics
 {
 
+enum
+{
+    MAX_GRAPHICS_PIPELINES = 256,
+};
+
 class Vulkan
 {
 public:
@@ -35,8 +41,10 @@ public:
     Vulkan(const Vulkan &) = delete;
     Vulkan &operator=(const Vulkan &) = delete;
 
-    void drawFrame();
+    void drawFrame(uint32_t graphics_pipeline_index);
     void idle();
+
+    uint32_t getGraphicsPipelineCount() { return graphics_pipelines; }
 
     Window* window;
 
@@ -88,8 +96,9 @@ private:
     std::vector<VkImageView> swapChainImageViews;
 
     VkRenderPass renderPass;
-    VkPipelineLayout pipelineLayout;
-    VkPipeline graphicsPipeline;
+    VkPipelineLayout pipelineLayout[MAX_GRAPHICS_PIPELINES];
+    VkPipeline graphicsPipeline[MAX_GRAPHICS_PIPELINES];
+    uint32_t graphics_pipelines = 0;
 
     const int MAX_FRAMES_IN_FLIGHT = 2;
     uint32_t currentFrame = 0;
@@ -137,8 +146,11 @@ private:
     void createImageViews();
     void destroyImageViews();
 
-    void createGraphicsPipeline();
-    void destroyGraphicsPipeline();
+    void createGraphicsPipelines();
+    void destroyGraphicsPipelines();
+
+    void createGraphicsPipeline(uint32_t graphics_pipeline_index, std::string vert_shader_file, std::string frag_shader_file);
+    void destroyGraphicsPipeline(uint32_t graphics_pipeline_index);
 
     VkShaderModule createShaderModule(const std::vector<char>& code);
 
@@ -152,7 +164,7 @@ private:
     void destroyCommandPool();
 
     void createCommandBuffers();
-    void recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex);
+    void recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex, uint32_t graphics_pipeline_index);
     
     void createSyncObjects();
     void destroySyncObjects();
