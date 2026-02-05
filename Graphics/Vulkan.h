@@ -30,6 +30,8 @@ namespace Graphics
 enum
 {
     MAX_GRAPHICS_PIPELINES = 256,
+    MAX_FRAMES_IN_FLIGHT = 2,
+    TIMESTAMPS_SIZE = MAX_FRAMES_IN_FLIGHT * 2,
 };
 
 class Vulkan
@@ -45,6 +47,7 @@ public:
     void idle();
 
     uint32_t getGraphicsPipelineCount() { return graphics_pipelines; }
+    std::string getGraphicsPipelineName(uint32_t graphics_pipeline_index) { return graphics_pipeline_names.at(graphics_pipeline_index); }
 
     Window* window;
 
@@ -99,8 +102,8 @@ private:
     VkPipelineLayout pipelineLayout[MAX_GRAPHICS_PIPELINES];
     VkPipeline graphicsPipeline[MAX_GRAPHICS_PIPELINES];
     uint32_t graphics_pipelines = 0;
+    std::vector<std::string> graphics_pipeline_names;
 
-    const int MAX_FRAMES_IN_FLIGHT = 2;
     uint32_t currentFrame = 0;
     std::vector<VkFramebuffer> swapChainFramebuffers;
     VkCommandPool commandPool;
@@ -110,6 +113,13 @@ private:
     std::vector<VkSemaphore> renderFinishedSemaphores;
     std::vector<VkFence> inFlightFences;
 
+    VkQueryPool queryPoolTimestamps;
+    float timestampPeriod;
+    uint64_t timestamps[TIMESTAMPS_SIZE];
+    uint64_t prevTimestamp = 0;
+    float sumDeltaTimestamp = 0;
+    uint32_t numTimestamps = 0;
+    uint32_t prev_graphics_pipeline_index = 0u;
 
     void createInstance();
     void destroyInstance();
@@ -168,6 +178,10 @@ private:
     
     void createSyncObjects();
     void destroySyncObjects();
+
+    bool checkTimestampSuppport(VkPhysicalDevice device, QueueFamilyIndices indices);
+    void createQueryPool();
+    void destroyQueryPool();
 };
 
 } // namespace Graphics

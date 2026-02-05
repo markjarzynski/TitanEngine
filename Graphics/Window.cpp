@@ -12,7 +12,9 @@ Window::Window (int Width, int Height, std::string Name)
 
     glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
 
-    glfw_window = glfwCreateWindow(width, height, name.c_str(), nullptr, nullptr);
+    GLFWmonitor* glfw_primary_monitor = glfwGetPrimaryMonitor();
+
+    glfw_window = glfwCreateWindow(width, height, name.c_str(), glfw_primary_monitor, nullptr);
     glfwSetWindowUserPointer(glfw_window, this);
     glfwSetFramebufferSizeCallback(glfw_window, framebufferResizeCallback);
 }

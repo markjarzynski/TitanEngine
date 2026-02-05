@@ -7,8 +7,9 @@ for %%f in (*.frag) do (
 )
 CD ..
 
-MD ..\build\Debug\shaders
-MOVE *.spv ..\build\Debug\shaders
+MD ..\build\shaders
+MOVE *.spv ..\build\shaders
 
-MD ..\build\Debug\shaders\hash_functions
-MOVE hash_functions\*.spv ..\build\Debug\shaders\hash_functions
+MD ..\build\shaders\hash_functions
+DEL ..\build\shaders\hash_functions\*.spv
+MOVE hash_functions\*.spv ..\build\shaders\hash_functions

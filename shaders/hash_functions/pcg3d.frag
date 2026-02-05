@@ -23,7 +23,12 @@ uvec3 pcg3d(uvec3 v) {
 void main() {
 
     uvec3 v = uvec3(gl_FragCoord.xyz);
-    vec3 hash = vec3(pcg3d(v)) * (1.f / 0xFFFFFFFFu);
+    
+    for (int i = 0; i < 10000; i++)
+    {
+        v = pcg3d(v);
+    }
 
+    vec3 hash = vec3(v) * (1.f / 0xFFFFFFFFu);
     outColor = vec4(hash, 1.0);
 }

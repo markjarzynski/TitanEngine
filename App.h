@@ -17,8 +17,8 @@ class App
 public:
     App() {}
 
-    static constexpr int WIDTH = 800;
-    static constexpr int HEIGHT = 600;
+    static constexpr int WIDTH = 3840;
+    static constexpr int HEIGHT = 2160;
 
     void run();
 

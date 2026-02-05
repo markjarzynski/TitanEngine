@@ -20,6 +20,8 @@ public:
 
     bool ShouldClose() { return glfwWindowShouldClose(glfw_window); }
 
+    void Close() { glfwDestroyWindow(glfw_window); }
+
     GLFWwindow* getWindow() { return glfw_window; }
 
     bool framebufferResized = false;

@@ -21,10 +21,12 @@ Vulkan::Vulkan (Window* window)
     createCommandPool();
     createCommandBuffers();
     createSyncObjects();
+    createQueryPool();
 }
 
 Vulkan::~Vulkan ()
 {
+    destroyQueryPool();
     destroySyncObjects();
     destroyCommandPool();
     destroyFrameBuffers();
@@ -258,6 +260,8 @@ bool Vulkan::isDeviceSuitable (VkPhysicalDevice device)
         swapChainAdequate = !swapChainSupport.formats.empty() && !swapChainSupport.presentModes.empty();
     }
 
+    bool timestampsSupported = checkTimestampSuppport(device, indices);
+
     return indices.isComplete() && extensionsSupported && swapChainAdequate;
 }
 
@@ -277,6 +281,11 @@ Vulkan::QueueFamilyIndices Vulkan::findQueueFamilies (VkPhysicalDevice device)
         if (queueFamily.queueFlags & VK_QUEUE_GRAPHICS_BIT)
         {
             indices.graphicsFamily = i;
+
+            if (queueFamily.timestampValidBits == 0)
+            {
+                throw std::runtime_error("[ERROR]: The selected graphics queue family does not support timestamp queries.");
+            }
         }
 
         VkBool32 presentSupport = false;
@@ -594,13 +603,14 @@ void Vulkan::destroyImageViews ()
 
 void Vulkan::createGraphicsPipelines()
 {
-    std::string path = "shaders/hash_functions";
-    std::string vert_shader_file = "shaders/vert.spv";
+    std::string path = "../shaders/hash_functions";
+    std::string vert_shader_file = "../shaders/vert.spv";
     std::string frag_shader_file;
 
     for (const auto& entry : std::filesystem::directory_iterator(path))
     {
         frag_shader_file = entry.path().string();
+        graphics_pipeline_names.push_back(frag_shader_file);
         createGraphicsPipeline(graphics_pipelines++, vert_shader_file, frag_shader_file);
     }
 }
@@ -887,6 +897,8 @@ void Vulkan::recordCommandBuffer (VkCommandBuffer commandBuffer, uint32_t imageI
         throw std::runtime_error("[ERROR]: Failed to begin recording command buffer.");
     }
 
+    vkCmdResetQueryPool(commandBuffer, queryPoolTimestamps, 0, TIMESTAMPS_SIZE);
+
     VkRenderPassBeginInfo renderPassInfo{};
     renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
     renderPassInfo.renderPass = renderPass;
@@ -915,7 +927,11 @@ void Vulkan::recordCommandBuffer (VkCommandBuffer commandBuffer, uint32_t imageI
     scissor.extent = swapChainExtent;
     vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
 
+    vkCmdWriteTimestamp(commandBuffer, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, queryPoolTimestamps, 0);
+
     vkCmdDraw(commandBuffer, 3, 1, 0, 0);
+
+    vkCmdWriteTimestamp(commandBuffer, VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT, queryPoolTimestamps, 1);
 
     vkCmdEndRenderPass(commandBuffer);
 
@@ -959,8 +975,54 @@ void Vulkan::destroySyncObjects ()
     }
 }
 
+bool Vulkan::checkTimestampSuppport(VkPhysicalDevice device, QueueFamilyIndices indices)
+{
+    VkPhysicalDeviceProperties properties;
+    vkGetPhysicalDeviceProperties(device, &properties);
+    VkPhysicalDeviceLimits deviceLimits = properties.limits;
+    timestampPeriod = deviceLimits.timestampPeriod;
+    if (deviceLimits.timestampPeriod == 0)
+    {
+        throw std::runtime_error("[ERROR]: The selected device does not support timestamp queries.");
+        return false;
+    }
+
+    return true;
+}
+
+void Vulkan::createQueryPool()
+{
+    VkQueryPoolCreateInfo queryPoolInfo{};
+    queryPoolInfo.sType = VK_STRUCTURE_TYPE_QUERY_POOL_CREATE_INFO;
+    queryPoolInfo.queryType = VK_QUERY_TYPE_TIMESTAMP;
+    queryPoolInfo.queryCount = TIMESTAMPS_SIZE;
+    if (vkCreateQueryPool(device, &queryPoolInfo, nullptr, &queryPoolTimestamps) != VK_SUCCESS)
+    {
+        throw std::runtime_error("[ERROR]: Failed to create query pool.");
+    }
+}
+
+void Vulkan::destroyQueryPool()
+{
+    vkDestroyQueryPool(device, queryPoolTimestamps, nullptr);
+}
+
 void Vulkan::drawFrame (uint32_t graphics_pipeline_index)
 {
+    if (prev_graphics_pipeline_index != graphics_pipeline_index && numTimestamps != 0)
+    {
+        std::cout << getGraphicsPipelineName(prev_graphics_pipeline_index) << ": " << sumDeltaTimestamp / numTimestamps << std::endl;
+
+        prev_graphics_pipeline_index = graphics_pipeline_index;
+        sumDeltaTimestamp = 0.f;
+        numTimestamps = 0;
+    }
+
+    if (graphics_pipeline_index >= MAX_GRAPHICS_PIPELINES)
+    {
+        return;
+    }
+
     vkWaitForFences(device, 1, &inFlightFences[currentFrame], VK_TRUE, UINT64_MAX);
 
     uint32_t imageIndex;
@@ -1024,6 +1086,31 @@ void Vulkan::drawFrame (uint32_t graphics_pipeline_index)
     {
         throw std::runtime_error("[ERROR]: Failed to present swap chain image.");
     }
+
+    vkGetQueryPoolResults(device, queryPoolTimestamps, 0, 1, 2 * sizeof(uint64_t), &timestamps[currentFrame * MAX_FRAMES_IN_FLIGHT], 2 * sizeof(uint64_t), VK_QUERY_RESULT_64_BIT | VK_QUERY_RESULT_WITH_AVAILABILITY_BIT);
+
+    // if (timestamps[currentFrame * 2 + 1] != 0)
+    // {
+    //     std::cout << "Timestamp: " << timestamps[currentFrame * 2] << std::endl;
+    // }
+
+    static bool bFirstFrame = true;
+    if (timestamps[currentFrame * 2 + 1] != 0)
+    {
+        float delta = float(timestamps[currentFrame * 2] - prevTimestamp) * timestampPeriod / 1000000.f;
+        //std::cout << "Timestamp delta (ms): " << delta << std::endl;
+        
+        if (!bFirstFrame && delta > 0.f && delta < 5000.f)
+        {
+            sumDeltaTimestamp += delta;
+            numTimestamps++;
+        }
+
+        prevTimestamp = timestamps[currentFrame * 2];
+    }
+    bFirstFrame = false;
+
+    prev_graphics_pipeline_index = graphics_pipeline_index;
 
     currentFrame = (currentFrame + 1) % MAX_FRAMES_IN_FLIGHT;
 }
