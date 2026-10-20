@@ -6,7 +6,6 @@
 #endif
 
 #include <string>
-#include <chrono>
 #include <ratio>
 
 namespace Titan

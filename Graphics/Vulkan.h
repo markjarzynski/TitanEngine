@@ -32,6 +32,7 @@ enum
     MAX_GRAPHICS_PIPELINES = 256,
     MAX_FRAMES_IN_FLIGHT = 2,
     TIMESTAMPS_SIZE = MAX_FRAMES_IN_FLIGHT * 2,
+    NUM_TIMESTAMP_SAMPLES = 48,
 };
 
 class Vulkan
@@ -43,6 +44,9 @@ public:
     Vulkan(const Vulkan &) = delete;
     Vulkan &operator=(const Vulkan &) = delete;
 
+    float getAvgTiming();
+    void resetTimings();
+    size_t getNumTimestampSamples();
     void drawFrame(uint32_t graphics_pipeline_index);
     void idle();
 
@@ -116,6 +120,7 @@ private:
     VkQueryPool queryPoolTimestamps;
     float timestampPeriod;
     uint64_t timestamps[TIMESTAMPS_SIZE];
+    std::vector<uint64_t> timestamp_samples;
     uint64_t prevTimestamp = 0;
     float sumDeltaTimestamp = 0;
     uint32_t numTimestamps = 0;

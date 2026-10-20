@@ -22,6 +22,8 @@ Vulkan::Vulkan (Window* window)
     createCommandBuffers();
     createSyncObjects();
     createQueryPool();
+
+    timestamp_samples.reserve(NUM_TIMESTAMP_SAMPLES);
 }
 
 Vulkan::~Vulkan ()
@@ -603,7 +605,7 @@ void Vulkan::destroyImageViews ()
 
 void Vulkan::createGraphicsPipelines()
 {
-    std::string path = "../shaders/hash_functions";
+    std::string path = "../shaders/operations";
     std::string vert_shader_file = "../shaders/vert.spv";
     std::string frag_shader_file;
 
@@ -1007,17 +1009,43 @@ void Vulkan::destroyQueryPool()
     vkDestroyQueryPool(device, queryPoolTimestamps, nullptr);
 }
 
-void Vulkan::drawFrame (uint32_t graphics_pipeline_index)
+float Vulkan::getAvgTiming()
 {
-    if (prev_graphics_pipeline_index != graphics_pipeline_index && numTimestamps != 0)
-    {
-        std::cout << getGraphicsPipelineName(prev_graphics_pipeline_index) << ": " << sumDeltaTimestamp / numTimestamps << std::endl;
+    // Use the IQR method to throw out the outliers
+    std::sort(timestamp_samples.begin(), timestamp_samples.end());
+    uint32_t Q1 = timestamp_samples[timestamp_samples.size() / 4];
+    uint32_t Q3 = timestamp_samples[timestamp_samples.size() * 3 / 4];
+    uint32_t IQR = Q3 - Q1;
+    uint32_t lo = Q1 - 1.5 * IQR;
+    uint32_t hi = Q3 + 1.5 * IQR;
 
-        prev_graphics_pipeline_index = graphics_pipeline_index;
-        sumDeltaTimestamp = 0.f;
-        numTimestamps = 0;
+    float sum = 0.f;
+    uint32_t count = 0;
+    for (int i = 0; i < timestamp_samples.size(); i++)
+    {
+        uint32_t s = timestamp_samples[i];
+        if (s >= lo && s <= hi)
+        {
+            sum += s * (timestampPeriod / 1000000.0);
+            count++;
+        }
     }
 
+    return sum / count;
+}
+
+size_t Vulkan::getNumTimestampSamples()
+{
+    return timestamp_samples.size();
+}
+
+void Vulkan::resetTimings()
+{
+    timestamp_samples.clear();
+}
+
+void Vulkan::drawFrame (uint32_t graphics_pipeline_index)
+{
     if (graphics_pipeline_index >= MAX_GRAPHICS_PIPELINES)
     {
         return;
@@ -1089,23 +1117,14 @@ void Vulkan::drawFrame (uint32_t graphics_pipeline_index)
 
     vkGetQueryPoolResults(device, queryPoolTimestamps, 0, 1, 2 * sizeof(uint64_t), &timestamps[currentFrame * MAX_FRAMES_IN_FLIGHT], 2 * sizeof(uint64_t), VK_QUERY_RESULT_64_BIT | VK_QUERY_RESULT_WITH_AVAILABILITY_BIT);
 
-    // if (timestamps[currentFrame * 2 + 1] != 0)
-    // {
-    //     std::cout << "Timestamp: " << timestamps[currentFrame * 2] << std::endl;
-    // }
-
     static bool bFirstFrame = true;
     if (timestamps[currentFrame * 2 + 1] != 0)
     {
-        float delta = float(timestamps[currentFrame * 2] - prevTimestamp) * timestampPeriod / 1000000.f;
-        //std::cout << "Timestamp delta (ms): " << delta << std::endl;
-        
-        if (!bFirstFrame && delta > 0.f && delta < 5000.f)
+        uint64_t delta = timestamps[currentFrame * 2] - prevTimestamp;
+        if (!bFirstFrame && delta > 0)
         {
-            sumDeltaTimestamp += delta;
-            numTimestamps++;
+            timestamp_samples.push_back(delta);
         }
-
         prevTimestamp = timestamps[currentFrame * 2];
     }
     bFirstFrame = false;
